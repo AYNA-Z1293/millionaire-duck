@@ -1,0 +1,11691 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>پرواز مرغابی کوچولو</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Tahoma, Arial, sans-serif;
+    background: #87d8ff;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#gameWrapper {
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+    position: relative;
+    overflow: hidden;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+}
+
+/* طراح */
+#designer {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+
+    background: rgba(255,255,255,0.85);
+    color: #31566b;
+
+    padding: 7px 18px;
+    border-radius: 20px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+}
+
+/* اطلاعات بازی */
+#hud {
+    position: absolute;
+    top: 55px;
+    left: 0;
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    z-index: 5;
+    pointer-events: none;
+}
+
+.hudBox {
+    background: rgba(255,255,255,0.78);
+    color: #31566b;
+
+    padding: 7px 13px;
+    border-radius: 18px;
+
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* راهنما */
+#hint {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: rgba(255,255,255,0.72);
+    color: #4c7180;
+
+    padding: 7px 15px;
+    border-radius: 20px;
+
+    font-size: 11px;
+    white-space: nowrap;
+
+    z-index: 5;
+}
+
+/* صفحه‌ها */
+.screen {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(30,110,140,0.30);
+    backdrop-filter: blur(4px);
+
+    z-index: 20;
+}
+
+.panel {
+    width: min(92%, 440px);
+
+    padding: 30px 24px;
+
+    background: rgba(255,255,255,0.96);
+    border-radius: 30px;
+
+    text-align: center;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.duckEmoji {
+    font-size: 65px;
+
+    animation: floating 1.8s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-9px);
+    }
+}
+
+h1 {
+    color: #28657d;
+    margin: 8px 0;
+    font-size: 27px;
+}
+
+p {
+    color: #627b86;
+    line-height: 1.9;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+
+    padding: 13px;
+
+    border: 2px solid #c5e7f2;
+    border-radius: 15px;
+
+    outline: none;
+
+    text-align: center;
+
+    font-family: Tahoma;
+    font-size: 17px;
+}
+
+input:focus {
+    border-color: #62b7d2;
+}
+
+button {
+    border: none;
+
+    margin-top: 14px;
+
+    padding: 13px 30px;
+
+    border-radius: 15px;
+
+    background: #4eafd0;
+    color: white;
+
+    font-family: Tahoma;
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 5px 15px rgba(60,160,190,0.25);
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+#gameOverScreen {
+    display: none;
+}
+
+#result {
+    color: #456b78;
+    font-size: 17px;
+    line-height: 2;
+}
+
+.small {
+    color: #82949b;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+#leaderboard {
+    width: 100%;
+    margin-top: 15px;
+
+    border-collapse: collapse;
+
+    font-size: 12px;
+    color: #526e79;
+}
+
+#leaderboard td,
+#leaderboard th {
+    padding: 6px;
+    border-bottom: 1px solid #e2edef;
+}
+
+#leaderboard th {
+    color: #33738a;
+}
+
+
+/* موبایل */
+@media(max-width:520px) {
+
+    #designer {
+        top: 7px;
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+
+    #hud {
+        top: 42px;
+    }
+
+    .hudBox {
+        font-size: 11px;
+        padding: 6px 9px;
+    }
+
+    .panel {
+        padding: 24px 18px;
+    }
+
+    h1 {
+        font-size: 23px;
+    }
+
+    .duckEmoji {
+        font-size: 55px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="gameWrapper">
+
+<canvas id="game"></canvas>
+
+<div id="designer">
+    طراح: ایناز طیاری
+</div>
+
+<div id="hud">
+
+    <div class="hudBox">
+        بازیکن: <span id="playerHud">-</span>
+    </div>
+
+    <div class="hudBox">
+        امتیاز: <span id="score">0</span>
+    </div>
+
+    <div class="hudBox">
+        🏆 رکورد: <span id="best">0</span>
+    </div>
+
+    <div class="hudBox">
+        ❤️ <span id="lives">3</span>
+    </div>
+
+    <div class="hudBox">
+        🪙 <span id="coins">0</span>
+    </div>
+
+</div>
+
+<div id="hint">
+    لمس صفحه / کلیک / Space = پرواز 🪽
+</div>
+
+
+<!-- صفحه شروع -->
+
+<div id="startScreen" class="screen">
+
+    <div class="panel">
+
+        <div class="duckEmoji">
+            🦆
+        </div>
+
+        <h1>
+            پرواز مرغابی کوچولو
+        </h1>
+
+        <p>
+            مرغابی کوچولو بقچه‌اش را برداشته و آماده‌ی پرواز است! 🧺
+            <br>
+            از تونل‌ها رد شو، سکه جمع کن و رکورد بزن.
+        </p>
+
+        <input
+            id="playerName"
+            maxlength="20"
+            placeholder="اسم شرکت‌کننده"
+            autocomplete="off"
+        >
+
+        <br>
+
+        <button onclick="startGame()">
+            شروع مسابقه ✨
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- صفحه پایان -->
+
+<div id="gameOverScreen" class="screen">
+
+    <div class="panel">
+
+        <div class="duckEmoji">
+            💫🦆
+        </div>
+
+        <h1>
+            پرواز تمام شد!
+        </h1>
+
+        <div id="result"></div>
+
+        <div id="recordMessage" class="small"></div>
+
+        <table id="leaderboard">
+
+            <thead>
+
+                <tr>
+                    <th>رتبه</th>
+                    <th>شرکت‌کننده</th>
+                    <th>امتیاز</th>
+                </tr>
+
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+
+        <button onclick="restartGame()">
+            دوباره بازی کن 🔄
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   تنظیمات اصلی
+========================= */
+
+const canvas =
+    document.getElementById("game");
+
+const ctx =
+    canvas.getContext("2d");
+
+let W;
+let H;
+let DPR;
+
+let playing = false;
+
+let score = 0;
+let coins = 0;
+let lives = 3;
+
+let speed = 3.2;
+
+let spawnTimer = 0;
+
+let playerName = "";
+
+let best =
+    Number(localStorage.getItem("duckBest") || 0);
+
+document.getElementById("best").textContent =
+    best;
+
+
+/* =========================
+   مرغابی
+========================= */
+
+const duck = {
+
+    x: 0,
+
+    y: 0,
+
+    width: 55,
+
+    height: 40,
+
+    velocity: 0,
+
+    gravity: 0.43,
+
+    jump: -7.6,
+
+    rotation: 0
+
+};
+
+
+/* =========================
+   تونل‌ها
+========================= */
+
+let tunnels = [];
+
+
+/* =========================
+   سکه‌ها
+========================= */
+
+let coinObjects = [];
+
+
+/* =========================
+   ابرها
+========================= */
+
+let clouds = [];
+
+
+/* =========================
+   ذرات
+========================= */
+
+let particles = [];
+
+
+/* =========================
+   تغییر اندازه
+========================= */
+
+function resizeCanvas() {
+
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
+
+    DPR =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+    canvas.width =
+        W * DPR;
+
+    canvas.height =
+        H * DPR;
+
+    ctx.setTransform(
+        DPR,
+        0,
+        0,
+        DPR,
+        0,
+        0
+    );
+}
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+resizeCanvas();
+
+
+/* =========================
+   عدد تصادفی
+========================= */
+
+function random(min,max) {
+
+    return min +
+        Math.random() *
+        (max-min);
+}
+
+
+/* =========================
+   HUD
+========================= */
+
+function updateHUD() {
+
+    document.getElementById(
+        "playerHud"
+    ).textContent = playerName;
+
+    document.getElementById(
+        "score"
+    ).textContent = score;
+
+    document.getElementById(
+        "coins"
+    ).textContent = coins;
+
+    document.getElementById(
+        "lives"
+    ).textContent = lives;
+
+    document.getElementById(
+        "best"
+    ).textContent = best;
+}
+
+
+/* =========================
+   ابرها
+========================= */
+
+function createClouds() {
+
+    clouds = [];
+
+    for(let i=0;i<8;i++) {
+
+        clouds.push({
+
+            x: random(0,W),
+
+            y: random(50,H*0.55),
+
+            scale: random(.45,1.1),
+
+            speed: random(.08,.22)
+
+        });
+
+    }
+}
+
+
+/* =========================
+   شروع بازی
+========================= */
+
+function startGame() {
+
+    const input =
+        document.getElementById(
+            "playerName"
+        );
+
+    playerName =
+        input.value.trim();
+
+    if(!playerName) {
+
+        input.style.borderColor =
+            "#e87979";
+
+        input.focus();
+
+        return;
+    }
+
+    input.style.borderColor =
+        "#c5e7f2";
+
+
+    document.getElementById(
+        "startScreen"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "gameOverScreen"
+    ).style.display = "none";
+
+
+    score = 0;
+
+    coins = 0;
+
+    lives = 3;
+
+    speed = 3.2;
+
+    spawnTimer = 0;
+
+    tunnels = [];
+
+    coinObjects = [];
+
+    particles = [];
+
+
+    duck.x =
+        W * 0.25;
+
+    duck.y =
+        H * 0.46;
+
+    duck.velocity =
+        0;
+
+
+    createClouds();
+
+    updateHUD();
+
+    playing = true;
+
+
+    createTunnel(
+        W + 100
+    );
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+}
+
+
+/* =========================
+   شروع دوباره
+========================= */
+
+function restartGame() {
+
+    startGame();
+}
+
+
+/* =========================
+   پرواز
+========================= */
+
+function flap() {
+
+    if(!playing)
+        return;
+
+    duck.velocity =
+        duck.jump;
+}
+
+
+/* =========================
+   کنترل کیبورد
+========================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if(
+            event.code === "Space" ||
+            event.code === "ArrowUp"
+        ) {
+
+            event.preventDefault();
+
+            flap();
+        }
+
+    }
+);
+
+
+/* =========================
+   کنترل موبایل
+========================= */
+
+canvas.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+
+        flap();
+    }
+);
+
+
+/* =========================
+   ساخت تونل
+========================= */
+
+function createTunnel(x) {
+
+    /*
+      هرچه امتیاز بیشتر شود،
+      فاصله‌ی تونل کمتر می‌شود.
+    */
+
+    let difficulty =
+        Math.min(
+            score * 1.35,
+            H * .23
+        );
+
+
+    let gap =
+        H * .42 -
+        difficulty;
+
+
+    /*
+      حداقل فاصله‌ی تونل
+    */
+
+    gap =
+        Math.max(
+            95,
+            gap
+        );
+
+
+    const minTop = 70;
+
+    const maxTop =
+        Math.max(
+            minTop + 10,
+            H - 55 - gap
+        );
+
+
+    const top =
+        random(
+            minTop,
+            maxTop
+        );
+
+
+    tunnels.push({
+
+        x: x,
+
+        width: 78,
+
+        top: top,
+
+        gap: gap,
+
+        passed: false
+
+    });
+
+
+    /*
+      گاهی داخل تونل سکه می‌گذاریم.
+    */
+
+    if(Math.random() < .85) {
+
+        coinObjects.push({
+
+            x: x + 39,
+
+            y: top + gap/2,
+
+            radius: 9,
+
+            collected: false,
+
+            phase: random(0,6)
+
+        });
+
+    }
+
+}
+
+
+/* =========================
+   پس‌زمینه
+========================= */
+
+function drawBackground() {
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#78d4ff"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#e1f8ff"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /*
+      خورشید
+    */
+
+    ctx.fillStyle =
+        "#ffe68c";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        W*.82,
+        H*.18,
+        38,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      ابرها
+    */
+
+    clouds.forEach(
+        function(cloud) {
+
+            cloud.x -=
+                cloud.speed;
+
+
+            if(
+                cloud.x <
+                -100
+            ) {
+
+                cloud.x =
+                    W + 100;
+            }
+
+
+            drawCloud(
+                cloud
+            );
+
+        }
+    );
+
+
+    /*
+      کوه‌های دور
+    */
+
+    ctx.fillStyle =
+        "#b9e4a0";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        H-95
+    );
+
+
+    for(
+        let x=0;
+        x<=W;
+        x+=55
+    ) {
+
+        ctx.lineTo(
+            x,
+            H-95-
+            random(0,30)
+        );
+
+    }
+
+
+    ctx.lineTo(
+        W,
+        H-35
+    );
+
+    ctx.lineTo(
+        0,
+        H-35
+    );
+
+    ctx.fill();
+
+}
+
+
+/* =========================
+   ابر
+========================= */
+
+function drawCloud(cloud) {
+
+    ctx.save();
+
+    ctx.translate(
+        cloud.x,
+        cloud.y
+    );
+
+    ctx.scale(
+        cloud.scale,
+        cloud.scale
+    );
+
+
+    ctx.fillStyle =
+        "rgba(255,255,255,.72)";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        -27,
+        5,
+        18,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.arc(
+        0,
+        -7,
+        25,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.arc(
+        28,
+        6,
+        17,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.fillRect(
+        -44,
+        5,
+        88,
+        18
+    );
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   زمین
+========================= */
+
+function drawGround() {
+
+    ctx.fillStyle =
+        "#91cf68";
+
+
+    ctx.fillRect(
+        0,
+        H-35,
+        W,
+        35
+    );
+
+
+    ctx.fillStyle =
+        "#67ad50";
+
+
+    for(
+        let x=0;
+        x<W+30;
+        x+=22
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            H-35
+        );
+
+        ctx.lineTo(
+            x+8,
+            H-45
+        );
+
+        ctx.lineTo(
+            x+13,
+            H-35
+        );
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =========================
+   تونل
+========================= */
+
+function drawTunnel(tunnel) {
+
+    const bottom =
+        tunnel.top +
+        tunnel.gap;
+
+
+    const gradient =
+        ctx.createLinearGradient(
+            tunnel.x,
+            0,
+            tunnel.x+tunnel.width,
+            0
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#4d9b58"
+    );
+
+
+    gradient.addColorStop(
+        .5,
+        "#a0df80"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#3d864c"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    /*
+      تونل بالا
+    */
+
+    ctx.fillRect(
+        tunnel.x,
+        0,
+        tunnel.width,
+        tunnel.top
+    );
+
+
+    /*
+      تونل پایین
+    */
+
+    ctx.fillRect(
+        tunnel.x,
+        bottom,
+        tunnel.width,
+        H-35-bottom
+    );
+
+
+    /*
+      لبه‌ها
+    */
+
+    ctx.fillStyle =
+        "#347743";
+
+
+    ctx.fillRect(
+        tunnel.x-6,
+        tunnel.top-15,
+        tunnel.width+12,
+        15
+    );
+
+
+    ctx.fillRect(
+        tunnel.x-6,
+        bottom,
+        tunnel.width+12,
+        15
+    );
+
+
+    /*
+      برگ‌ها
+    */
+
+    ctx.fillStyle =
+        "#c1ee99";
+
+
+    for(
+        let y=35;
+        y<tunnel.top-18;
+        y+=47
+    ) {
+
+        ctx.beginPath();
+
+
+        ctx.ellipse(
+            tunnel.x+18,
+            y,
+            10,
+            5,
+            -.5,
+            0,
+            Math.PI*2
+        );
+
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =========================
+   سکه
+========================= */
+
+function drawCoin(coin) {
+
+    if(coin.collected)
+        return;
+
+
+    coin.phase += .08;
+
+
+    const scale =
+        1 +
+        Math.sin(
+            coin.phase
+        )*.08;
+
+
+    ctx.save();
+
+
+    ctx.translate(
+        coin.x,
+        coin.y
+    );
+
+
+    ctx.scale(
+        scale,
+        scale
+    );
+
+
+    ctx.fillStyle =
+        "#ffd35c";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        0,
+        0,
+        coin.radius,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.strokeStyle =
+        "#e4a43c";
+
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.stroke();
+
+
+    ctx.fillStyle =
+        "#fff0a1";
+
+
+    ctx.font =
+        "bold 11px Arial";
+
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.textBaseline =
+        "middle";
+
+
+    ctx.fillText(
+        "★",
+        0,
+        1
+    );
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   مرغابی
+========================= */
+
+function drawDuck() {
+
+    ctx.save();
+
+
+    ctx.translate(
+        duck.x,
+        duck.y
+    );
+
+
+    duck.rotation =
+        Math.max(
+            -.35,
+            Math.min(
+                duck.velocity*.055,
+                .55
+            )
+        );
+
+
+    ctx.rotate(
+        duck.rotation
+    );
+
+
+    /*
+      نخ بقچه
+    */
+
+    ctx.strokeStyle =
+        "#8c6572";
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        40,
+        -2
+    );
+
+
+    ctx.lineTo(
+        59,
+        -10
+    );
+
+
+    ctx.stroke();
+
+
+    /*
+      بدن
+    */
+
+    ctx.fillStyle =
+        "#fff1a4";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        0,
+        0,
+        28,
+        19,
+        0,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      بال
+    */
+
+    ctx.fillStyle =
+        "#dfc96f";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        -5,
+        5,
+        16,
+        8,
+        -.3,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      سر
+    */
+
+    ctx.fillStyle =
+        "#fff5b8";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        22,
+        -14,
+        17,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        29,
+        -19,
+        13,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      چشم
+    */
+
+    ctx.fillStyle =
+        "#26373d";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        33,
+        -23,
+        2.7,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      منقار
+    */
+
+    ctx.fillStyle =
+        "#efa03a";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        39,
+        -17
+    );
+
+
+    ctx.lineTo(
+        56,
+        -12
+    );
+
+
+    ctx.lineTo(
+        39,
+        -7
+    );
+
+
+    ctx.closePath();
+
+
+    ctx.fill();
+
+
+    /*
+      بقچه
+    */
+
+    ctx.save();
+
+
+    ctx.translate(
+        48,
+        -3
+    );
+
+
+    ctx.rotate(.12);
+
+
+    ctx.fillStyle =
+        "#d986a6";
+
+
+    ctx.beginPath();
+
+
+    ctx.roundRect(
+        -7,
+        -8,
+        20,
+        14,
+        4
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      بند بقچه
+    */
+
+    ctx.strokeStyle =
+        "#f1c477";
+
+
+    ctx.lineWidth =
+        3;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        -7,
+        -3
+    );
+
+
+    ctx.lineTo(
+        13,
+        -3
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+
+    /*
+      پاها
+    */
+
+    ctx.strokeStyle =
+        "#e59635";
+
+
+    ctx.lineWidth =
+        3;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        -7,
+        16
+    );
+
+
+    ctx.lineTo(
+        -10,
+        27
+    );
+
+
+    ctx.moveTo(
+        7,
+        16
+    );
+
+
+    ctx.lineTo(
+        10,
+        27
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   ذرات
+========================= */
+
+function createParticles(
+    x,
+    y,
+    amount
+) {
+
+    for(
+        let i=0;
+        i<amount;
+        i++
+    ) {
+
+        particles.push({
+
+            x:x,
+
+            y:y,
+
+            vx:random(-2,2),
+
+            vy:random(-2,2),
+
+            life:random(15,30),
+
+            radius:random(1,3)
+
+        });
+
+    }
+
+}
+
+
+function drawParticles() {
+
+    for(
+        let i=particles.length-1;
+        i>=0;
+        i--
+    ) {
+
+        const p =
+            particles[i];
+
+
+        p.x += p.vx;
+
+        p.y += p.vy;
+
+        p.vy += .05;
+
+        p.life--;
+
+
+        ctx.globalAlpha =
+            Math.max(
+                0,
+                p.life/30
+            );
+
+
+        ctx.fillStyle =
+            "#ffffff";
+
+
+        ctx.beginPath();
+
+
+        ctx.arc(
+            p.x,
+            p.y,
+            p.radius,
+            0,
+            Math.PI*2
+        );
+
+
+        ctx.fill();
+
+
+        ctx.globalAlpha =
+            1;
+
+
+        if(
+            p.life<=0
+        ) {
+
+            particles.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   برخورد
+========================= */
+
+function collision() {
+
+    const left =
+        duck.x-23;
+
+    const right =
+        duck.x+29;
+
+    const top =
+        duck.y-17;
+
+    const bottom =
+        duck.y+20;
+
+
+    /*
+      سقف و زمین
+    */
+
+    if(
+        top<=0 ||
+        bottom>=H-35
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+      تونل‌ها
+    */
+
+    for(
+        const tunnel
+        of tunnels
+    ) {
+
+        if(
+            right>tunnel.x &&
+            left<
+            tunnel.x+tunnel.width
+        ) {
+
+            if(
+                top<tunnel.top ||
+                bottom>
+                tunnel.top+
+                tunnel.gap
+            ) {
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================
+   گرفتن سکه
+========================= */
+
+function collectCoins() {
+
+    for(
+        const coin
+        of coinObjects
+    ) {
+
+        if(
+            coin.collected
+        )
+            continue;
+
+
+        const distance =
+            Math.hypot(
+                duck.x-coin.x,
+                duck.y-coin.y
+            );
+
+
+        if(
+            distance<25
+        ) {
+
+            coin.collected =
+                true;
+
+
+            coins++;
+
+
+            createParticles(
+                coin.x,
+                coin.y,
+                10
+            );
+
+
+            updateHUD();
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   از دست دادن جان
+========================= */
+
+function loseLife() {
+
+    lives--;
+
+    createParticles(
+        duck.x,
+        duck.y,
+        15
+    );
+
+
+    updateHUD();
+
+
+    if(
+        lives<=0
+    ) {
+
+        gameOver();
+
+        return;
+
+    }
+
+
+    /*
+      برگشت به مسیر
+    */
+
+    duck.x =
+        W*.25;
+
+    duck.y =
+        H*.46;
+
+    duck.velocity =
+        -5;
+
+
+    /*
+      تونل‌های خیلی نزدیک حذف شوند
+    */
+
+    tunnels =
+        tunnels.filter(
+            tunnel =>
+                tunnel.x>
+                duck.x+100
+        );
+
+}
+
+
+/* =========================
+   ذخیره امتیاز
+========================= */
+
+function saveScore() {
+
+    let scores =
+        JSON.parse(
+            localStorage.getItem(
+                "duckScores"
+            ) || "[]"
+        );
+
+
+    scores.push({
+
+        name:playerName,
+
+        score:score,
+
+        coins:coins,
+
+        date:Date.now()
+
+    });
+
+
+    scores.sort(
+        (a,b) =>
+            b.score-a.score
+    );
+
+
+    scores =
+        scores.slice(
+            0,
+            10
+        );
+
+
+    localStorage.setItem(
+        "duckScores",
+        JSON.stringify(scores)
+    );
+
+
+    return scores;
+
+}
+
+
+/* =========================
+   پایان بازی
+========================= */
+
+function gameOver() {
+
+    playing =
+        false;
+
+
+    const oldBest =
+        best;
+
+
+    if(
+        score>best
+    ) {
+
+        best =
+            score;
+
+
+        localStorage.setItem(
+            "duckBest",
+            best
+        );
+
+    }
+
+
+    const scores =
+        saveScore();
+
+
+    document.getElementById(
+        "result"
+    ).innerHTML =
+        playerName +
+        "، امتیاز شما <b>" +
+        score +
+        "</b> بود.<br>" +
+        "🪙 سکه‌ها: <b>" +
+        coins +
+        "</b>";
+
+
+    document.getElementById(
+        "recordMessage"
+    ).textContent =
+        score>oldBest
+        ? "🎉 رکورد جدید!"
+        : "🏆 رکورد فعلی: " + best;
+
+
+    const tbody =
+        document.querySelector(
+            "#leaderboard tbody"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    scores.forEach(
+        function(item,index) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML =
+                "<td>" +
+                (index+1) +
+                "</td>" +
+
+                "<td>" +
+                escapeHTML(
+                    item.name
+                ) +
+                "</td>" +
+
+                "<td>" +
+                item.score +
+                "</td>";
+
+
+            tbody.appendChild(row);
+
+        }
+    );
+
+
+    document.getElementById(
+        "gameOverScreen"
+    ).style.display =
+        "flex";
+
+
+    updateHUD();
+
+}
+
+
+/* =========================
+   جلوگیری از HTML Injection
+========================= */
+
+function escapeHTML(text) {
+
+    return text.replace(
+        /[&<>"']/g,
+        function(character) {
+
+            return {
+
+                "&":"&amp;",
+                "<":"&lt;",
+                ">":"&gt;",
+                '"':"&quot;",
+                "'":"&#039;"
+
+            }[character];
+
+        }
+    );
+
+}
+
+
+/* =========================
+   حلقه بازی
+========================= */
+
+function gameLoop() {
+
+    if(!playing)
+        return;
+
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /*
+      پس‌زمینه
+    */
+
+    drawBackground();
+
+
+    /*
+      افزایش سختی
+    */
+
+    speed =
+        3.15 +
+        Math.min(
+            score*.055,
+            3.2
+        );
+
+
+    /*
+      فیزیک مرغابی
+    */
+
+    duck.velocity +=
+        duck.gravity;
+
+
+    duck.y +=
+        duck.velocity;
+
+
+    /*
+      ایجاد تونل جدید
+    */
+
+    spawnTimer -=
+        speed;
+
+
+    if(
+        spawnTimer<=0
+    ) {
+
+        createTunnel(
+            W+30
+        );
+
+
+        /*
+          با افزایش امتیاز
+          تونل‌ها نزدیک‌تر می‌شوند.
+        */
+
+        spawnTimer =
+            Math.max(
+                185,
+                285 -
+                score*2.1
+            );
+
+    }
+
+
+    /*
+      حرکت تونل‌ها
+    */
+
+    for(
+        let i=tunnels.length-1;
+        i>=0;
+        i--
+    ) {
+
+        const tunnel =
+            tunnels[i];
+
+
+        tunnel.x -=
+            speed;
+
+
+        /*
+          عبور موفق
+        */
+
+        if(
+            !tunnel.passed &&
+            tunnel.x+
+            tunnel.width<
+            duck.x
+        ) {
+
+            tunnel.passed =
+                true;
+
+
+            score++;
+
+
+            createParticles(
+                duck.x,
+                duck.y,
+                4
+            );
+
+
+            updateHUD();
+
+        }
+
+
+        /*
+          حذف تونل‌های قدیمی
+        */
+
+        if(
+            tunnel.x+
+            tunnel.width<
+            -30
+        ) {
+
+            tunnels.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    /*
+      حرکت سکه‌ها
+    */
+
+    for(
+        let i=coinObjects.length-1;
+        i>=0;
+        i--
+    ) {
+
+        coinObjects[i].x -=
+            speed;
+
+
+        if(
+            coinObjects[i].x<
+            -30
+        ) {
+
+            coinObjects.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    /*
+      رسم
+    */
+
+    tunnels.forEach(
+        drawTunnel
+    );
+
+
+    coinObjects.forEach(
+        drawCoin
+    );
+
+
+    drawGround();
+
+
+    collectCoins();
+
+
+    drawParticles();
+
+
+    drawDuck();
+
+
+    /*
+      برخورد
+    */
+
+    if(
+        collision()
+    ) {
+
+        loseLife();
+
+        if(!playing)
+            return;
+
+    }
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================
+   آماده‌سازی اولیه
+========================= */
+
+createClouds();
+
+drawBackground();
+
+drawGround();
+
+duck.x =
+    W*.25;
+
+duck.y =
+    H*.46;
+
+drawDuck();
+
+updateHUD();
+
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>پرواز مرغابی کوچولو</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Tahoma, Arial, sans-serif;
+    background: #87d8ff;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#gameWrapper {
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+    position: relative;
+    overflow: hidden;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+}
+
+/* طراح */
+#designer {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+
+    background: rgba(255,255,255,0.85);
+    color: #31566b;
+
+    padding: 7px 18px;
+    border-radius: 20px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+}
+
+/* اطلاعات بازی */
+#hud {
+    position: absolute;
+    top: 55px;
+    left: 0;
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    z-index: 5;
+    pointer-events: none;
+}
+
+.hudBox {
+    background: rgba(255,255,255,0.78);
+    color: #31566b;
+
+    padding: 7px 13px;
+    border-radius: 18px;
+
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* راهنما */
+#hint {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: rgba(255,255,255,0.72);
+    color: #4c7180;
+
+    padding: 7px 15px;
+    border-radius: 20px;
+
+    font-size: 11px;
+    white-space: nowrap;
+
+    z-index: 5;
+}
+
+/* صفحه‌ها */
+.screen {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(30,110,140,0.30);
+    backdrop-filter: blur(4px);
+
+    z-index: 20;
+}
+
+.panel {
+    width: min(92%, 440px);
+
+    padding: 30px 24px;
+
+    background: rgba(255,255,255,0.96);
+    border-radius: 30px;
+
+    text-align: center;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.duckEmoji {
+    font-size: 65px;
+
+    animation: floating 1.8s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-9px);
+    }
+}
+
+h1 {
+    color: #28657d;
+    margin: 8px 0;
+    font-size: 27px;
+}
+
+p {
+    color: #627b86;
+    line-height: 1.9;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+
+    padding: 13px;
+
+    border: 2px solid #c5e7f2;
+    border-radius: 15px;
+
+    outline: none;
+
+    text-align: center;
+
+    font-family: Tahoma;
+    font-size: 17px;
+}
+
+input:focus {
+    border-color: #62b7d2;
+}
+
+button {
+    border: none;
+
+    margin-top: 14px;
+
+    padding: 13px 30px;
+
+    border-radius: 15px;
+
+    background: #4eafd0;
+    color: white;
+
+    font-family: Tahoma;
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 5px 15px rgba(60,160,190,0.25);
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+#gameOverScreen {
+    display: none;
+}
+
+#result {
+    color: #456b78;
+    font-size: 17px;
+    line-height: 2;
+}
+
+.small {
+    color: #82949b;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+#leaderboard {
+    width: 100%;
+    margin-top: 15px;
+
+    border-collapse: collapse;
+
+    font-size: 12px;
+    color: #526e79;
+}
+
+#leaderboard td,
+#leaderboard th {
+    padding: 6px;
+    border-bottom: 1px solid #e2edef;
+}
+
+#leaderboard th {
+    color: #33738a;
+}
+
+
+/* موبایل */
+@media(max-width:520px) {
+
+    #designer {
+        top: 7px;
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+
+    #hud {
+        top: 42px;
+    }
+
+    .hudBox {
+        font-size: 11px;
+        padding: 6px 9px;
+    }
+
+    .panel {
+        padding: 24px 18px;
+    }
+
+    h1 {
+        font-size: 23px;
+    }
+
+    .duckEmoji {
+        font-size: 55px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="gameWrapper">
+
+<canvas id="game"></canvas>
+
+<div id="designer">
+    طراح: ایناز طیاری
+</div>
+
+<div id="hud">
+
+    <div class="hudBox">
+        بازیکن: <span id="playerHud">-</span>
+    </div>
+
+    <div class="hudBox">
+        امتیاز: <span id="score">0</span>
+    </div>
+
+    <div class="hudBox">
+        🏆 رکورد: <span id="best">0</span>
+    </div>
+
+    <div class="hudBox">
+        ❤️ <span id="lives">3</span>
+    </div>
+
+    <div class="hudBox">
+        🪙 <span id="coins">0</span>
+    </div>
+
+</div>
+
+<div id="hint">
+    لمس صفحه / کلیک / Space = پرواز 🪽
+</div>
+
+
+<!-- صفحه شروع -->
+
+<div id="startScreen" class="screen">
+
+    <div class="panel">
+
+        <div class="duckEmoji">
+            🦆
+        </div>
+
+        <h1>
+            پرواز مرغابی کوچولو
+        </h1>
+
+        <p>
+            مرغابی کوچولو بقچه‌اش را برداشته و آماده‌ی پرواز است! 🧺
+            <br>
+            از تونل‌ها رد شو، سکه جمع کن و رکورد بزن.
+        </p>
+
+        <input
+            id="playerName"
+            maxlength="20"
+            placeholder="اسم شرکت‌کننده"
+            autocomplete="off"
+        >
+
+        <br>
+
+        <button onclick="startGame()">
+            شروع مسابقه ✨
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- صفحه پایان -->
+
+<div id="gameOverScreen" class="screen">
+
+    <div class="panel">
+
+        <div class="duckEmoji">
+            💫🦆
+        </div>
+
+        <h1>
+            پرواز تمام شد!
+        </h1>
+
+        <div id="result"></div>
+
+        <div id="recordMessage" class="small"></div>
+
+        <table id="leaderboard">
+
+            <thead>
+
+                <tr>
+                    <th>رتبه</th>
+                    <th>شرکت‌کننده</th>
+                    <th>امتیاز</th>
+                </tr>
+
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+
+        <button onclick="restartGame()">
+            دوباره بازی کن 🔄
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   تنظیمات اصلی
+========================= */
+
+const canvas =
+    document.getElementById("game");
+
+const ctx =
+    canvas.getContext("2d");
+
+let W;
+let H;
+let DPR;
+
+let playing = false;
+
+let score = 0;
+let coins = 0;
+let lives = 3;
+
+let speed = 3.2;
+
+let spawnTimer = 0;
+
+let playerName = "";
+
+let best =
+    Number(localStorage.getItem("duckBest") || 0);
+
+document.getElementById("best").textContent =
+    best;
+
+
+/* =========================
+   مرغابی
+========================= */
+
+const duck = {
+
+    x: 0,
+
+    y: 0,
+
+    width: 55,
+
+    height: 40,
+
+    velocity: 0,
+
+    gravity: 0.43,
+
+    jump: -7.6,
+
+    rotation: 0
+
+};
+
+
+/* =========================
+   تونل‌ها
+========================= */
+
+let tunnels = [];
+
+
+/* =========================
+   سکه‌ها
+========================= */
+
+let coinObjects = [];
+
+
+/* =========================
+   ابرها
+========================= */
+
+let clouds = [];
+
+
+/* =========================
+   ذرات
+========================= */
+
+let particles = [];
+
+
+/* =========================
+   تغییر اندازه
+========================= */
+
+function resizeCanvas() {
+
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
+
+    DPR =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+    canvas.width =
+        W * DPR;
+
+    canvas.height =
+        H * DPR;
+
+    ctx.setTransform(
+        DPR,
+        0,
+        0,
+        DPR,
+        0,
+        0
+    );
+}
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+resizeCanvas();
+
+
+/* =========================
+   عدد تصادفی
+========================= */
+
+function random(min,max) {
+
+    return min +
+        Math.random() *
+        (max-min);
+}
+
+
+/* =========================
+   HUD
+========================= */
+
+function updateHUD() {
+
+    document.getElementById(
+        "playerHud"
+    ).textContent = playerName;
+
+    document.getElementById(
+        "score"
+    ).textContent = score;
+
+    document.getElementById(
+        "coins"
+    ).textContent = coins;
+
+    document.getElementById(
+        "lives"
+    ).textContent = lives;
+
+    document.getElementById(
+        "best"
+    ).textContent = best;
+}
+
+
+/* =========================
+   ابرها
+========================= */
+
+function createClouds() {
+
+    clouds = [];
+
+    for(let i=0;i<8;i++) {
+
+        clouds.push({
+
+            x: random(0,W),
+
+            y: random(50,H*0.55),
+
+            scale: random(.45,1.1),
+
+            speed: random(.08,.22)
+
+        });
+
+    }
+}
+
+
+/* =========================
+   شروع بازی
+========================= */
+
+function startGame() {
+
+    const input =
+        document.getElementById(
+            "playerName"
+        );
+
+    playerName =
+        input.value.trim();
+
+    if(!playerName) {
+
+        input.style.borderColor =
+            "#e87979";
+
+        input.focus();
+
+        return;
+    }
+
+    input.style.borderColor =
+        "#c5e7f2";
+
+
+    document.getElementById(
+        "startScreen"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "gameOverScreen"
+    ).style.display = "none";
+
+
+    score = 0;
+
+    coins = 0;
+
+    lives = 3;
+
+    speed = 3.2;
+
+    spawnTimer = 0;
+
+    tunnels = [];
+
+    coinObjects = [];
+
+    particles = [];
+
+
+    duck.x =
+        W * 0.25;
+
+    duck.y =
+        H * 0.46;
+
+    duck.velocity =
+        0;
+
+
+    createClouds();
+
+    updateHUD();
+
+    playing = true;
+
+
+    createTunnel(
+        W + 100
+    );
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+}
+
+
+/* =========================
+   شروع دوباره
+========================= */
+
+function restartGame() {
+
+    startGame();
+}
+
+
+/* =========================
+   پرواز
+========================= */
+
+function flap() {
+
+    if(!playing)
+        return;
+
+    duck.velocity =
+        duck.jump;
+}
+
+
+/* =========================
+   کنترل کیبورد
+========================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if(
+            event.code === "Space" ||
+            event.code === "ArrowUp"
+        ) {
+
+            event.preventDefault();
+
+            flap();
+        }
+
+    }
+);
+
+
+/* =========================
+   کنترل موبایل
+========================= */
+
+canvas.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+
+        flap();
+    }
+);
+
+
+/* =========================
+   ساخت تونل
+========================= */
+
+function createTunnel(x) {
+
+    /*
+      هرچه امتیاز بیشتر شود،
+      فاصله‌ی تونل کمتر می‌شود.
+    */
+
+    let difficulty =
+        Math.min(
+            score * 1.35,
+            H * .23
+        );
+
+
+    let gap =
+        H * .42 -
+        difficulty;
+
+
+    /*
+      حداقل فاصله‌ی تونل
+    */
+
+    gap =
+        Math.max(
+            95,
+            gap
+        );
+
+
+    const minTop = 70;
+
+    const maxTop =
+        Math.max(
+            minTop + 10,
+            H - 55 - gap
+        );
+
+
+    const top =
+        random(
+            minTop,
+            maxTop
+        );
+
+
+    tunnels.push({
+
+        x: x,
+
+        width: 78,
+
+        top: top,
+
+        gap: gap,
+
+        passed: false
+
+    });
+
+
+    /*
+      گاهی داخل تونل سکه می‌گذاریم.
+    */
+
+    if(Math.random() < .85) {
+
+        coinObjects.push({
+
+            x: x + 39,
+
+            y: top + gap/2,
+
+            radius: 9,
+
+            collected: false,
+
+            phase: random(0,6)
+
+        });
+
+    }
+
+}
+
+
+/* =========================
+   پس‌زمینه
+========================= */
+
+function drawBackground() {
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#78d4ff"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#e1f8ff"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /*
+      خورشید
+    */
+
+    ctx.fillStyle =
+        "#ffe68c";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        W*.82,
+        H*.18,
+        38,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      ابرها
+    */
+
+    clouds.forEach(
+        function(cloud) {
+
+            cloud.x -=
+                cloud.speed;
+
+
+            if(
+                cloud.x <
+                -100
+            ) {
+
+                cloud.x =
+                    W + 100;
+            }
+
+
+            drawCloud(
+                cloud
+            );
+
+        }
+    );
+
+
+    /*
+      کوه‌های دور
+    */
+
+    ctx.fillStyle =
+        "#b9e4a0";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        H-95
+    );
+
+
+    for(
+        let x=0;
+        x<=W;
+        x+=55
+    ) {
+
+        ctx.lineTo(
+            x,
+            H-95-
+            random(0,30)
+        );
+
+    }
+
+
+    ctx.lineTo(
+        W,
+        H-35
+    );
+
+    ctx.lineTo(
+        0,
+        H-35
+    );
+
+    ctx.fill();
+
+}
+
+
+/* =========================
+   ابر
+========================= */
+
+function drawCloud(cloud) {
+
+    ctx.save();
+
+    ctx.translate(
+        cloud.x,
+        cloud.y
+    );
+
+    ctx.scale(
+        cloud.scale,
+        cloud.scale
+    );
+
+
+    ctx.fillStyle =
+        "rgba(255,255,255,.72)";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        -27,
+        5,
+        18,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.arc(
+        0,
+        -7,
+        25,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.arc(
+        28,
+        6,
+        17,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.fillRect(
+        -44,
+        5,
+        88,
+        18
+    );
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   زمین
+========================= */
+
+function drawGround() {
+
+    ctx.fillStyle =
+        "#91cf68";
+
+
+    ctx.fillRect(
+        0,
+        H-35,
+        W,
+        35
+    );
+
+
+    ctx.fillStyle =
+        "#67ad50";
+
+
+    for(
+        let x=0;
+        x<W+30;
+        x+=22
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            H-35
+        );
+
+        ctx.lineTo(
+            x+8,
+            H-45
+        );
+
+        ctx.lineTo(
+            x+13,
+            H-35
+        );
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =========================
+   تونل
+========================= */
+
+function drawTunnel(tunnel) {
+
+    const bottom =
+        tunnel.top +
+        tunnel.gap;
+
+
+    const gradient =
+        ctx.createLinearGradient(
+            tunnel.x,
+            0,
+            tunnel.x+tunnel.width,
+            0
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#4d9b58"
+    );
+
+
+    gradient.addColorStop(
+        .5,
+        "#a0df80"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#3d864c"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    /*
+      تونل بالا
+    */
+
+    ctx.fillRect(
+        tunnel.x,
+        0,
+        tunnel.width,
+        tunnel.top
+    );
+
+
+    /*
+      تونل پایین
+    */
+
+    ctx.fillRect(
+        tunnel.x,
+        bottom,
+        tunnel.width,
+        H-35-bottom
+    );
+
+
+    /*
+      لبه‌ها
+    */
+
+    ctx.fillStyle =
+        "#347743";
+
+
+    ctx.fillRect(
+        tunnel.x-6,
+        tunnel.top-15,
+        tunnel.width+12,
+        15
+    );
+
+
+    ctx.fillRect(
+        tunnel.x-6,
+        bottom,
+        tunnel.width+12,
+        15
+    );
+
+
+    /*
+      برگ‌ها
+    */
+
+    ctx.fillStyle =
+        "#c1ee99";
+
+
+    for(
+        let y=35;
+        y<tunnel.top-18;
+        y+=47
+    ) {
+
+        ctx.beginPath();
+
+
+        ctx.ellipse(
+            tunnel.x+18,
+            y,
+            10,
+            5,
+            -.5,
+            0,
+            Math.PI*2
+        );
+
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =========================
+   سکه
+========================= */
+
+function drawCoin(coin) {
+
+    if(coin.collected)
+        return;
+
+
+    coin.phase += .08;
+
+
+    const scale =
+        1 +
+        Math.sin(
+            coin.phase
+        )*.08;
+
+
+    ctx.save();
+
+
+    ctx.translate(
+        coin.x,
+        coin.y
+    );
+
+
+    ctx.scale(
+        scale,
+        scale
+    );
+
+
+    ctx.fillStyle =
+        "#ffd35c";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        0,
+        0,
+        coin.radius,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.strokeStyle =
+        "#e4a43c";
+
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.stroke();
+
+
+    ctx.fillStyle =
+        "#fff0a1";
+
+
+    ctx.font =
+        "bold 11px Arial";
+
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.textBaseline =
+        "middle";
+
+
+    ctx.fillText(
+        "★",
+        0,
+        1
+    );
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   مرغابی
+========================= */
+
+function drawDuck() {
+
+    ctx.save();
+
+
+    ctx.translate(
+        duck.x,
+        duck.y
+    );
+
+
+    duck.rotation =
+        Math.max(
+            -.35,
+            Math.min(
+                duck.velocity*.055,
+                .55
+            )
+        );
+
+
+    ctx.rotate(
+        duck.rotation
+    );
+
+
+    /*
+      نخ بقچه
+    */
+
+    ctx.strokeStyle =
+        "#8c6572";
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        40,
+        -2
+    );
+
+
+    ctx.lineTo(
+        59,
+        -10
+    );
+
+
+    ctx.stroke();
+
+
+    /*
+      بدن
+    */
+
+    ctx.fillStyle =
+        "#fff1a4";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        0,
+        0,
+        28,
+        19,
+        0,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      بال
+    */
+
+    ctx.fillStyle =
+        "#dfc96f";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        -5,
+        5,
+        16,
+        8,
+        -.3,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      سر
+    */
+
+    ctx.fillStyle =
+        "#fff5b8";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        22,
+        -14,
+        17,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        29,
+        -19,
+        13,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      چشم
+    */
+
+    ctx.fillStyle =
+        "#26373d";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        33,
+        -23,
+        2.7,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      منقار
+    */
+
+    ctx.fillStyle =
+        "#efa03a";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        39,
+        -17
+    );
+
+
+    ctx.lineTo(
+        56,
+        -12
+    );
+
+
+    ctx.lineTo(
+        39,
+        -7
+    );
+
+
+    ctx.closePath();
+
+
+    ctx.fill();
+
+
+    /*
+      بقچه
+    */
+
+    ctx.save();
+
+
+    ctx.translate(
+        48,
+        -3
+    );
+
+
+    ctx.rotate(.12);
+
+
+    ctx.fillStyle =
+        "#d986a6";
+
+
+    ctx.beginPath();
+
+
+    ctx.roundRect(
+        -7,
+        -8,
+        20,
+        14,
+        4
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      بند بقچه
+    */
+
+    ctx.strokeStyle =
+        "#f1c477";
+
+
+    ctx.lineWidth =
+        3;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        -7,
+        -3
+    );
+
+
+    ctx.lineTo(
+        13,
+        -3
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+
+    /*
+      پاها
+    */
+
+    ctx.strokeStyle =
+        "#e59635";
+
+
+    ctx.lineWidth =
+        3;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        -7,
+        16
+    );
+
+
+    ctx.lineTo(
+        -10,
+        27
+    );
+
+
+    ctx.moveTo(
+        7,
+        16
+    );
+
+
+    ctx.lineTo(
+        10,
+        27
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   ذرات
+========================= */
+
+function createParticles(
+    x,
+    y,
+    amount
+) {
+
+    for(
+        let i=0;
+        i<amount;
+        i++
+    ) {
+
+        particles.push({
+
+            x:x,
+
+            y:y,
+
+            vx:random(-2,2),
+
+            vy:random(-2,2),
+
+            life:random(15,30),
+
+            radius:random(1,3)
+
+        });
+
+    }
+
+}
+
+
+function drawParticles() {
+
+    for(
+        let i=particles.length-1;
+        i>=0;
+        i--
+    ) {
+
+        const p =
+            particles[i];
+
+
+        p.x += p.vx;
+
+        p.y += p.vy;
+
+        p.vy += .05;
+
+        p.life--;
+
+
+        ctx.globalAlpha =
+            Math.max(
+                0,
+                p.life/30
+            );
+
+
+        ctx.fillStyle =
+            "#ffffff";
+
+
+        ctx.beginPath();
+
+
+        ctx.arc(
+            p.x,
+            p.y,
+            p.radius,
+            0,
+            Math.PI*2
+        );
+
+
+        ctx.fill();
+
+
+        ctx.globalAlpha =
+            1;
+
+
+        if(
+            p.life<=0
+        ) {
+
+            particles.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   برخورد
+========================= */
+
+function collision() {
+
+    const left =
+        duck.x-23;
+
+    const right =
+        duck.x+29;
+
+    const top =
+        duck.y-17;
+
+    const bottom =
+        duck.y+20;
+
+
+    /*
+      سقف و زمین
+    */
+
+    if(
+        top<=0 ||
+        bottom>=H-35
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+      تونل‌ها
+    */
+
+    for(
+        const tunnel
+        of tunnels
+    ) {
+
+        if(
+            right>tunnel.x &&
+            left<
+            tunnel.x+tunnel.width
+        ) {
+
+            if(
+                top<tunnel.top ||
+                bottom>
+                tunnel.top+
+                tunnel.gap
+            ) {
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================
+   گرفتن سکه
+========================= */
+
+function collectCoins() {
+
+    for(
+        const coin
+        of coinObjects
+    ) {
+
+        if(
+            coin.collected
+        )
+            continue;
+
+
+        const distance =
+            Math.hypot(
+                duck.x-coin.x,
+                duck.y-coin.y
+            );
+
+
+        if(
+            distance<25
+        ) {
+
+            coin.collected =
+                true;
+
+
+            coins++;
+
+
+            createParticles(
+                coin.x,
+                coin.y,
+                10
+            );
+
+
+            updateHUD();
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   از دست دادن جان
+========================= */
+
+function loseLife() {
+
+    lives--;
+
+    createParticles(
+        duck.x,
+        duck.y,
+        15
+    );
+
+
+    updateHUD();
+
+
+    if(
+        lives<=0
+    ) {
+
+        gameOver();
+
+        return;
+
+    }
+
+
+    /*
+      برگشت به مسیر
+    */
+
+    duck.x =
+        W*.25;
+
+    duck.y =
+        H*.46;
+
+    duck.velocity =
+        -5;
+
+
+    /*
+      تونل‌های خیلی نزدیک حذف شوند
+    */
+
+    tunnels =
+        tunnels.filter(
+            tunnel =>
+                tunnel.x>
+                duck.x+100
+        );
+
+}
+
+
+/* =========================
+   ذخیره امتیاز
+========================= */
+
+function saveScore() {
+
+    let scores =
+        JSON.parse(
+            localStorage.getItem(
+                "duckScores"
+            ) || "[]"
+        );
+
+
+    scores.push({
+
+        name:playerName,
+
+        score:score,
+
+        coins:coins,
+
+        date:Date.now()
+
+    });
+
+
+    scores.sort(
+        (a,b) =>
+            b.score-a.score
+    );
+
+
+    scores =
+        scores.slice(
+            0,
+            10
+        );
+
+
+    localStorage.setItem(
+        "duckScores",
+        JSON.stringify(scores)
+    );
+
+
+    return scores;
+
+}
+
+
+/* =========================
+   پایان بازی
+========================= */
+
+function gameOver() {
+
+    playing =
+        false;
+
+
+    const oldBest =
+        best;
+
+
+    if(
+        score>best
+    ) {
+
+        best =
+            score;
+
+
+        localStorage.setItem(
+            "duckBest",
+            best
+        );
+
+    }
+
+
+    const scores =
+        saveScore();
+
+
+    document.getElementById(
+        "result"
+    ).innerHTML =
+        playerName +
+        "، امتیاز شما <b>" +
+        score +
+        "</b> بود.<br>" +
+        "🪙 سکه‌ها: <b>" +
+        coins +
+        "</b>";
+
+
+    document.getElementById(
+        "recordMessage"
+    ).textContent =
+        score>oldBest
+        ? "🎉 رکورد جدید!"
+        : "🏆 رکورد فعلی: " + best;
+
+
+    const tbody =
+        document.querySelector(
+            "#leaderboard tbody"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    scores.forEach(
+        function(item,index) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML =
+                "<td>" +
+                (index+1) +
+                "</td>" +
+
+                "<td>" +
+                escapeHTML(
+                    item.name
+                ) +
+                "</td>" +
+
+                "<td>" +
+                item.score +
+                "</td>";
+
+
+            tbody.appendChild(row);
+
+        }
+    );
+
+
+    document.getElementById(
+        "gameOverScreen"
+    ).style.display =
+        "flex";
+
+
+    updateHUD();
+
+}
+
+
+/* =========================
+   جلوگیری از HTML Injection
+========================= */
+
+function escapeHTML(text) {
+
+    return text.replace(
+        /[&<>"']/g,
+        function(character) {
+
+            return {
+
+                "&":"&amp;",
+                "<":"&lt;",
+                ">":"&gt;",
+                '"':"&quot;",
+                "'":"&#039;"
+
+            }[character];
+
+        }
+    );
+
+}
+
+
+/* =========================
+   حلقه بازی
+========================= */
+
+function gameLoop() {
+
+    if(!playing)
+        return;
+
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /*
+      پس‌زمینه
+    */
+
+    drawBackground();
+
+
+    /*
+      افزایش سختی
+    */
+
+    speed =
+        3.15 +
+        Math.min(
+            score*.055,
+            3.2
+        );
+
+
+    /*
+      فیزیک مرغابی
+    */
+
+    duck.velocity +=
+        duck.gravity;
+
+
+    duck.y +=
+        duck.velocity;
+
+
+    /*
+      ایجاد تونل جدید
+    */
+
+    spawnTimer -=
+        speed;
+
+
+    if(
+        spawnTimer<=0
+    ) {
+
+        createTunnel(
+            W+30
+        );
+
+
+        /*
+          با افزایش امتیاز
+          تونل‌ها نزدیک‌تر می‌شوند.
+        */
+
+        spawnTimer =
+            Math.max(
+                185,
+                285 -
+                score*2.1
+            );
+
+    }
+
+
+    /*
+      حرکت تونل‌ها
+    */
+
+    for(
+        let i=tunnels.length-1;
+        i>=0;
+        i--
+    ) {
+
+        const tunnel =
+            tunnels[i];
+
+
+        tunnel.x -=
+            speed;
+
+
+        /*
+          عبور موفق
+        */
+
+        if(
+            !tunnel.passed &&
+            tunnel.x+
+            tunnel.width<
+            duck.x
+        ) {
+
+            tunnel.passed =
+                true;
+
+
+            score++;
+
+
+            createParticles(
+                duck.x,
+                duck.y,
+                4
+            );
+
+
+            updateHUD();
+
+        }
+
+
+        /*
+          حذف تونل‌های قدیمی
+        */
+
+        if(
+            tunnel.x+
+            tunnel.width<
+            -30
+        ) {
+
+            tunnels.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    /*
+      حرکت سکه‌ها
+    */
+
+    for(
+        let i=coinObjects.length-1;
+        i>=0;
+        i--
+    ) {
+
+        coinObjects[i].x -=
+            speed;
+
+
+        if(
+            coinObjects[i].x<
+            -30
+        ) {
+
+            coinObjects.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    /*
+      رسم
+    */
+
+    tunnels.forEach(
+        drawTunnel
+    );
+
+
+    coinObjects.forEach(
+        drawCoin
+    );
+
+
+    drawGround();
+
+
+    collectCoins();
+
+
+    drawParticles();
+
+
+    drawDuck();
+
+
+    /*
+      برخورد
+    */
+
+    if(
+        collision()
+    ) {
+
+        loseLife();
+
+        if(!playing)
+            return;
+
+    }
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================
+   آماده‌سازی اولیه
+========================= */
+
+createClouds();
+
+drawBackground();
+
+drawGround();
+
+duck.x =
+    W*.25;
+
+duck.y =
+    H*.46;
+
+drawDuck();
+
+updateHUD();
+
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>پرواز مرغابی کوچولو</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Tahoma, Arial, sans-serif;
+    background: #87d8ff;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#gameWrapper {
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+    position: relative;
+    overflow: hidden;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+}
+
+/* طراح */
+#designer {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+
+    background: rgba(255,255,255,0.85);
+    color: #31566b;
+
+    padding: 7px 18px;
+    border-radius: 20px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+}
+
+/* اطلاعات بازی */
+#hud {
+    position: absolute;
+    top: 55px;
+    left: 0;
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    z-index: 5;
+    pointer-events: none;
+}
+
+.hudBox {
+    background: rgba(255,255,255,0.78);
+    color: #31566b;
+
+    padding: 7px 13px;
+    border-radius: 18px;
+
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* راهنما */
+#hint {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: rgba(255,255,255,0.72);
+    color: #4c7180;
+
+    padding: 7px 15px;
+    border-radius: 20px;
+
+    font-size: 11px;
+    white-space: nowrap;
+
+    z-index: 5;
+}
+
+/* صفحه‌ها */
+.screen {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(30,110,140,0.30);
+    backdrop-filter: blur(4px);
+
+    z-index: 20;
+}
+
+.panel {
+    width: min(92%, 440px);
+
+    padding: 30px 24px;
+
+    background: rgba(255,255,255,0.96);
+    border-radius: 30px;
+
+    text-align: center;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.duckEmoji {
+    font-size: 65px;
+
+    animation: floating 1.8s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-9px);
+    }
+}
+
+h1 {
+    color: #28657d;
+    margin: 8px 0;
+    font-size: 27px;
+}
+
+p {
+    color: #627b86;
+    line-height: 1.9;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+
+    padding: 13px;
+
+    border: 2px solid #c5e7f2;
+    border-radius: 15px;
+
+    outline: none;
+
+    text-align: center;
+
+    font-family: Tahoma;
+    font-size: 17px;
+}
+
+input:focus {
+    border-color: #62b7d2;
+}
+
+button {
+    border: none;
+
+    margin-top: 14px;
+
+    padding: 13px 30px;
+
+    border-radius: 15px;
+
+    background: #4eafd0;
+    color: white;
+
+    font-family: Tahoma;
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 5px 15px rgba(60,160,190,0.25);
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+#gameOverScreen {
+    display: none;
+}
+
+#result {
+    color: #456b78;
+    font-size: 17px;
+    line-height: 2;
+}
+
+.small {
+    color: #82949b;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+#leaderboard {
+    width: 100%;
+    margin-top: 15px;
+
+    border-collapse: collapse;
+
+    font-size: 12px;
+    color: #526e79;
+}
+
+#leaderboard td,
+#leaderboard th {
+    padding: 6px;
+    border-bottom: 1px solid #e2edef;
+}
+
+#leaderboard th {
+    color: #33738a;
+}
+
+
+/* موبایل */
+@media(max-width:520px) {
+
+    #designer {
+        top: 7px;
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+
+    #hud {
+        top: 42px;
+    }
+
+    .hudBox {
+        font-size: 11px;
+        padding: 6px 9px;
+    }
+
+    .panel {
+        padding: 24px 18px;
+    }
+
+    h1 {
+        font-size: 23px;
+    }
+
+    .duckEmoji {
+        font-size: 55px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="gameWrapper">
+
+<canvas id="game"></canvas>
+
+<div id="designer">
+    طراح: ایناز طیاری
+</div>
+
+<div id="hud">
+
+    <div class="hudBox">
+        بازیکن: <span id="playerHud">-</span>
+    </div>
+
+    <div class="hudBox">
+        امتیاز: <span id="score">0</span>
+    </div>
+
+    <div class="hudBox">
+        🏆 رکورد: <span id="best">0</span>
+    </div>
+
+    <div class="hudBox">
+        ❤️ <span id="lives">3</span>
+    </div>
+
+    <div class="hudBox">
+        🪙 <span id="coins">0</span>
+    </div>
+
+</div>
+
+<div id="hint">
+    لمس صفحه / کلیک / Space = پرواز 🪽
+</div>
+
+
+<!-- صفحه شروع -->
+
+<div id="startScreen" class="screen">
+
+    <div class="panel">
+
+        <div class="duckEmoji">
+            🦆
+        </div>
+
+        <h1>
+            پرواز مرغابی کوچولو
+        </h1>
+
+        <p>
+            مرغابی کوچولو بقچه‌اش را برداشته و آماده‌ی پرواز است! 🧺
+            <br>
+            از تونل‌ها رد شو، سکه جمع کن و رکورد بزن.
+        </p>
+
+        <input
+            id="playerName"
+            maxlength="20"
+            placeholder="اسم شرکت‌کننده"
+            autocomplete="off"
+        >
+
+        <br>
+
+        <button onclick="startGame()">
+            شروع مسابقه ✨
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- صفحه پایان -->
+
+<div id="gameOverScreen" class="screen">
+
+    <div class="panel">
+
+        <div class="duckEmoji">
+            💫🦆
+        </div>
+
+        <h1>
+            پرواز تمام شد!
+        </h1>
+
+        <div id="result"></div>
+
+        <div id="recordMessage" class="small"></div>
+
+        <table id="leaderboard">
+
+            <thead>
+
+                <tr>
+                    <th>رتبه</th>
+                    <th>شرکت‌کننده</th>
+                    <th>امتیاز</th>
+                </tr>
+
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+
+        <button onclick="restartGame()">
+            دوباره بازی کن 🔄
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   تنظیمات اصلی
+========================= */
+
+const canvas =
+    document.getElementById("game");
+
+const ctx =
+    canvas.getContext("2d");
+
+let W;
+let H;
+let DPR;
+
+let playing = false;
+
+let score = 0;
+let coins = 0;
+let lives = 3;
+
+let speed = 3.2;
+
+let spawnTimer = 0;
+
+let playerName = "";
+
+let best =
+    Number(localStorage.getItem("duckBest") || 0);
+
+document.getElementById("best").textContent =
+    best;
+
+
+/* =========================
+   مرغابی
+========================= */
+
+const duck = {
+
+    x: 0,
+
+    y: 0,
+
+    width: 55,
+
+    height: 40,
+
+    velocity: 0,
+
+    gravity: 0.43,
+
+    jump: -7.6,
+
+    rotation: 0
+
+};
+
+
+/* =========================
+   تونل‌ها
+========================= */
+
+let tunnels = [];
+
+
+/* =========================
+   سکه‌ها
+========================= */
+
+let coinObjects = [];
+
+
+/* =========================
+   ابرها
+========================= */
+
+let clouds = [];
+
+
+/* =========================
+   ذرات
+========================= */
+
+let particles = [];
+
+
+/* =========================
+   تغییر اندازه
+========================= */
+
+function resizeCanvas() {
+
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
+
+    DPR =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+    canvas.width =
+        W * DPR;
+
+    canvas.height =
+        H * DPR;
+
+    ctx.setTransform(
+        DPR,
+        0,
+        0,
+        DPR,
+        0,
+        0
+    );
+}
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+resizeCanvas();
+
+
+/* =========================
+   عدد تصادفی
+========================= */
+
+function random(min,max) {
+
+    return min +
+        Math.random() *
+        (max-min);
+}
+
+
+/* =========================
+   HUD
+========================= */
+
+function updateHUD() {
+
+    document.getElementById(
+        "playerHud"
+    ).textContent = playerName;
+
+    document.getElementById(
+        "score"
+    ).textContent = score;
+
+    document.getElementById(
+        "coins"
+    ).textContent = coins;
+
+    document.getElementById(
+        "lives"
+    ).textContent = lives;
+
+    document.getElementById(
+        "best"
+    ).textContent = best;
+}
+
+
+/* =========================
+   ابرها
+========================= */
+
+function createClouds() {
+
+    clouds = [];
+
+    for(let i=0;i<8;i++) {
+
+        clouds.push({
+
+            x: random(0,W),
+
+            y: random(50,H*0.55),
+
+            scale: random(.45,1.1),
+
+            speed: random(.08,.22)
+
+        });
+
+    }
+}
+
+
+/* =========================
+   شروع بازی
+========================= */
+
+function startGame() {
+
+    const input =
+        document.getElementById(
+            "playerName"
+        );
+
+    playerName =
+        input.value.trim();
+
+    if(!playerName) {
+
+        input.style.borderColor =
+            "#e87979";
+
+        input.focus();
+
+        return;
+    }
+
+    input.style.borderColor =
+        "#c5e7f2";
+
+
+    document.getElementById(
+        "startScreen"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "gameOverScreen"
+    ).style.display = "none";
+
+
+    score = 0;
+
+    coins = 0;
+
+    lives = 3;
+
+    speed = 3.2;
+
+    spawnTimer = 0;
+
+    tunnels = [];
+
+    coinObjects = [];
+
+    particles = [];
+
+
+    duck.x =
+        W * 0.25;
+
+    duck.y =
+        H * 0.46;
+
+    duck.velocity =
+        0;
+
+
+    createClouds();
+
+    updateHUD();
+
+    playing = true;
+
+
+    createTunnel(
+        W + 100
+    );
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+}
+
+
+/* =========================
+   شروع دوباره
+========================= */
+
+function restartGame() {
+
+    startGame();
+}
+
+
+/* =========================
+   پرواز
+========================= */
+
+function flap() {
+
+    if(!playing)
+        return;
+
+    duck.velocity =
+        duck.jump;
+}
+
+
+/* =========================
+   کنترل کیبورد
+========================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if(
+            event.code === "Space" ||
+            event.code === "ArrowUp"
+        ) {
+
+            event.preventDefault();
+
+            flap();
+        }
+
+    }
+);
+
+
+/* =========================
+   کنترل موبایل
+========================= */
+
+canvas.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+
+        flap();
+    }
+);
+
+
+/* =========================
+   ساخت تونل
+========================= */
+
+function createTunnel(x) {
+
+    /*
+      هرچه امتیاز بیشتر شود،
+      فاصله‌ی تونل کمتر می‌شود.
+    */
+
+    let difficulty =
+        Math.min(
+            score * 1.35,
+            H * .23
+        );
+
+
+    let gap =
+        H * .42 -
+        difficulty;
+
+
+    /*
+      حداقل فاصله‌ی تونل
+    */
+
+    gap =
+        Math.max(
+            95,
+            gap
+        );
+
+
+    const minTop = 70;
+
+    const maxTop =
+        Math.max(
+            minTop + 10,
+            H - 55 - gap
+        );
+
+
+    const top =
+        random(
+            minTop,
+            maxTop
+        );
+
+
+    tunnels.push({
+
+        x: x,
+
+        width: 78,
+
+        top: top,
+
+        gap: gap,
+
+        passed: false
+
+    });
+
+
+    /*
+      گاهی داخل تونل سکه می‌گذاریم.
+    */
+
+    if(Math.random() < .85) {
+
+        coinObjects.push({
+
+            x: x + 39,
+
+            y: top + gap/2,
+
+            radius: 9,
+
+            collected: false,
+
+            phase: random(0,6)
+
+        });
+
+    }
+
+}
+
+
+/* =========================
+   پس‌زمینه
+========================= */
+
+function drawBackground() {
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#78d4ff"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#e1f8ff"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /*
+      خورشید
+    */
+
+    ctx.fillStyle =
+        "#ffe68c";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        W*.82,
+        H*.18,
+        38,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      ابرها
+    */
+
+    clouds.forEach(
+        function(cloud) {
+
+            cloud.x -=
+                cloud.speed;
+
+
+            if(
+                cloud.x <
+                -100
+            ) {
+
+                cloud.x =
+                    W + 100;
+            }
+
+
+            drawCloud(
+                cloud
+            );
+
+        }
+    );
+
+
+    /*
+      کوه‌های دور
+    */
+
+    ctx.fillStyle =
+        "#b9e4a0";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        H-95
+    );
+
+
+    for(
+        let x=0;
+        x<=W;
+        x+=55
+    ) {
+
+        ctx.lineTo(
+            x,
+            H-95-
+            random(0,30)
+        );
+
+    }
+
+
+    ctx.lineTo(
+        W,
+        H-35
+    );
+
+    ctx.lineTo(
+        0,
+        H-35
+    );
+
+    ctx.fill();
+
+}
+
+
+/* =========================
+   ابر
+========================= */
+
+function drawCloud(cloud) {
+
+    ctx.save();
+
+    ctx.translate(
+        cloud.x,
+        cloud.y
+    );
+
+    ctx.scale(
+        cloud.scale,
+        cloud.scale
+    );
+
+
+    ctx.fillStyle =
+        "rgba(255,255,255,.72)";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        -27,
+        5,
+        18,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.arc(
+        0,
+        -7,
+        25,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.arc(
+        28,
+        6,
+        17,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.fillRect(
+        -44,
+        5,
+        88,
+        18
+    );
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   زمین
+========================= */
+
+function drawGround() {
+
+    ctx.fillStyle =
+        "#91cf68";
+
+
+    ctx.fillRect(
+        0,
+        H-35,
+        W,
+        35
+    );
+
+
+    ctx.fillStyle =
+        "#67ad50";
+
+
+    for(
+        let x=0;
+        x<W+30;
+        x+=22
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            H-35
+        );
+
+        ctx.lineTo(
+            x+8,
+            H-45
+        );
+
+        ctx.lineTo(
+            x+13,
+            H-35
+        );
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =========================
+   تونل
+========================= */
+
+function drawTunnel(tunnel) {
+
+    const bottom =
+        tunnel.top +
+        tunnel.gap;
+
+
+    const gradient =
+        ctx.createLinearGradient(
+            tunnel.x,
+            0,
+            tunnel.x+tunnel.width,
+            0
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#4d9b58"
+    );
+
+
+    gradient.addColorStop(
+        .5,
+        "#a0df80"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#3d864c"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    /*
+      تونل بالا
+    */
+
+    ctx.fillRect(
+        tunnel.x,
+        0,
+        tunnel.width,
+        tunnel.top
+    );
+
+
+    /*
+      تونل پایین
+    */
+
+    ctx.fillRect(
+        tunnel.x,
+        bottom,
+        tunnel.width,
+        H-35-bottom
+    );
+
+
+    /*
+      لبه‌ها
+    */
+
+    ctx.fillStyle =
+        "#347743";
+
+
+    ctx.fillRect(
+        tunnel.x-6,
+        tunnel.top-15,
+        tunnel.width+12,
+        15
+    );
+
+
+    ctx.fillRect(
+        tunnel.x-6,
+        bottom,
+        tunnel.width+12,
+        15
+    );
+
+
+    /*
+      برگ‌ها
+    */
+
+    ctx.fillStyle =
+        "#c1ee99";
+
+
+    for(
+        let y=35;
+        y<tunnel.top-18;
+        y+=47
+    ) {
+
+        ctx.beginPath();
+
+
+        ctx.ellipse(
+            tunnel.x+18,
+            y,
+            10,
+            5,
+            -.5,
+            0,
+            Math.PI*2
+        );
+
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =========================
+   سکه
+========================= */
+
+function drawCoin(coin) {
+
+    if(coin.collected)
+        return;
+
+
+    coin.phase += .08;
+
+
+    const scale =
+        1 +
+        Math.sin(
+            coin.phase
+        )*.08;
+
+
+    ctx.save();
+
+
+    ctx.translate(
+        coin.x,
+        coin.y
+    );
+
+
+    ctx.scale(
+        scale,
+        scale
+    );
+
+
+    ctx.fillStyle =
+        "#ffd35c";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        0,
+        0,
+        coin.radius,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.strokeStyle =
+        "#e4a43c";
+
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.stroke();
+
+
+    ctx.fillStyle =
+        "#fff0a1";
+
+
+    ctx.font =
+        "bold 11px Arial";
+
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.textBaseline =
+        "middle";
+
+
+    ctx.fillText(
+        "★",
+        0,
+        1
+    );
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   مرغابی
+========================= */
+
+function drawDuck() {
+
+    ctx.save();
+
+
+    ctx.translate(
+        duck.x,
+        duck.y
+    );
+
+
+    duck.rotation =
+        Math.max(
+            -.35,
+            Math.min(
+                duck.velocity*.055,
+                .55
+            )
+        );
+
+
+    ctx.rotate(
+        duck.rotation
+    );
+
+
+    /*
+      نخ بقچه
+    */
+
+    ctx.strokeStyle =
+        "#8c6572";
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        40,
+        -2
+    );
+
+
+    ctx.lineTo(
+        59,
+        -10
+    );
+
+
+    ctx.stroke();
+
+
+    /*
+      بدن
+    */
+
+    ctx.fillStyle =
+        "#fff1a4";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        0,
+        0,
+        28,
+        19,
+        0,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      بال
+    */
+
+    ctx.fillStyle =
+        "#dfc96f";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        -5,
+        5,
+        16,
+        8,
+        -.3,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      سر
+    */
+
+    ctx.fillStyle =
+        "#fff5b8";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        22,
+        -14,
+        17,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        29,
+        -19,
+        13,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      چشم
+    */
+
+    ctx.fillStyle =
+        "#26373d";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        33,
+        -23,
+        2.7,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      منقار
+    */
+
+    ctx.fillStyle =
+        "#efa03a";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        39,
+        -17
+    );
+
+
+    ctx.lineTo(
+        56,
+        -12
+    );
+
+
+    ctx.lineTo(
+        39,
+        -7
+    );
+
+
+    ctx.closePath();
+
+
+    ctx.fill();
+
+
+    /*
+      بقچه
+    */
+
+    ctx.save();
+
+
+    ctx.translate(
+        48,
+        -3
+    );
+
+
+    ctx.rotate(.12);
+
+
+    ctx.fillStyle =
+        "#d986a6";
+
+
+    ctx.beginPath();
+
+
+    ctx.roundRect(
+        -7,
+        -8,
+        20,
+        14,
+        4
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      بند بقچه
+    */
+
+    ctx.strokeStyle =
+        "#f1c477";
+
+
+    ctx.lineWidth =
+        3;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        -7,
+        -3
+    );
+
+
+    ctx.lineTo(
+        13,
+        -3
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+
+    /*
+      پاها
+    */
+
+    ctx.strokeStyle =
+        "#e59635";
+
+
+    ctx.lineWidth =
+        3;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        -7,
+        16
+    );
+
+
+    ctx.lineTo(
+        -10,
+        27
+    );
+
+
+    ctx.moveTo(
+        7,
+        16
+    );
+
+
+    ctx.lineTo(
+        10,
+        27
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   ذرات
+========================= */
+
+function createParticles(
+    x,
+    y,
+    amount
+) {
+
+    for(
+        let i=0;
+        i<amount;
+        i++
+    ) {
+
+        particles.push({
+
+            x:x,
+
+            y:y,
+
+            vx:random(-2,2),
+
+            vy:random(-2,2),
+
+            life:random(15,30),
+
+            radius:random(1,3)
+
+        });
+
+    }
+
+}
+
+
+function drawParticles() {
+
+    for(
+        let i=particles.length-1;
+        i>=0;
+        i--
+    ) {
+
+        const p =
+            particles[i];
+
+
+        p.x += p.vx;
+
+        p.y += p.vy;
+
+        p.vy += .05;
+
+        p.life--;
+
+
+        ctx.globalAlpha =
+            Math.max(
+                0,
+                p.life/30
+            );
+
+
+        ctx.fillStyle =
+            "#ffffff";
+
+
+        ctx.beginPath();
+
+
+        ctx.arc(
+            p.x,
+            p.y,
+            p.radius,
+            0,
+            Math.PI*2
+        );
+
+
+        ctx.fill();
+
+
+        ctx.globalAlpha =
+            1;
+
+
+        if(
+            p.life<=0
+        ) {
+
+            particles.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   برخورد
+========================= */
+
+function collision() {
+
+    const left =
+        duck.x-23;
+
+    const right =
+        duck.x+29;
+
+    const top =
+        duck.y-17;
+
+    const bottom =
+        duck.y+20;
+
+
+    /*
+      سقف و زمین
+    */
+
+    if(
+        top<=0 ||
+        bottom>=H-35
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+      تونل‌ها
+    */
+
+    for(
+        const tunnel
+        of tunnels
+    ) {
+
+        if(
+            right>tunnel.x &&
+            left<
+            tunnel.x+tunnel.width
+        ) {
+
+            if(
+                top<tunnel.top ||
+                bottom>
+                tunnel.top+
+                tunnel.gap
+            ) {
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================
+   گرفتن سکه
+========================= */
+
+function collectCoins() {
+
+    for(
+        const coin
+        of coinObjects
+    ) {
+
+        if(
+            coin.collected
+        )
+            continue;
+
+
+        const distance =
+            Math.hypot(
+                duck.x-coin.x,
+                duck.y-coin.y
+            );
+
+
+        if(
+            distance<25
+        ) {
+
+            coin.collected =
+                true;
+
+
+            coins++;
+
+
+            createParticles(
+                coin.x,
+                coin.y,
+                10
+            );
+
+
+            updateHUD();
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   از دست دادن جان
+========================= */
+
+function loseLife() {
+
+    lives--;
+
+    createParticles(
+        duck.x,
+        duck.y,
+        15
+    );
+
+
+    updateHUD();
+
+
+    if(
+        lives<=0
+    ) {
+
+        gameOver();
+
+        return;
+
+    }
+
+
+    /*
+      برگشت به مسیر
+    */
+
+    duck.x =
+        W*.25;
+
+    duck.y =
+        H*.46;
+
+    duck.velocity =
+        -5;
+
+
+    /*
+      تونل‌های خیلی نزدیک حذف شوند
+    */
+
+    tunnels =
+        tunnels.filter(
+            tunnel =>
+                tunnel.x>
+                duck.x+100
+        );
+
+}
+
+
+/* =========================
+   ذخیره امتیاز
+========================= */
+
+function saveScore() {
+
+    let scores =
+        JSON.parse(
+            localStorage.getItem(
+                "duckScores"
+            ) || "[]"
+        );
+
+
+    scores.push({
+
+        name:playerName,
+
+        score:score,
+
+        coins:coins,
+
+        date:Date.now()
+
+    });
+
+
+    scores.sort(
+        (a,b) =>
+            b.score-a.score
+    );
+
+
+    scores =
+        scores.slice(
+            0,
+            10
+        );
+
+
+    localStorage.setItem(
+        "duckScores",
+        JSON.stringify(scores)
+    );
+
+
+    return scores;
+
+}
+
+
+/* =========================
+   پایان بازی
+========================= */
+
+function gameOver() {
+
+    playing =
+        false;
+
+
+    const oldBest =
+        best;
+
+
+    if(
+        score>best
+    ) {
+
+        best =
+            score;
+
+
+        localStorage.setItem(
+            "duckBest",
+            best
+        );
+
+    }
+
+
+    const scores =
+        saveScore();
+
+
+    document.getElementById(
+        "result"
+    ).innerHTML =
+        playerName +
+        "، امتیاز شما <b>" +
+        score +
+        "</b> بود.<br>" +
+        "🪙 سکه‌ها: <b>" +
+        coins +
+        "</b>";
+
+
+    document.getElementById(
+        "recordMessage"
+    ).textContent =
+        score>oldBest
+        ? "🎉 رکورد جدید!"
+        : "🏆 رکورد فعلی: " + best;
+
+
+    const tbody =
+        document.querySelector(
+            "#leaderboard tbody"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    scores.forEach(
+        function(item,index) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML =
+                "<td>" +
+                (index+1) +
+                "</td>" +
+
+                "<td>" +
+                escapeHTML(
+                    item.name
+                ) +
+                "</td>" +
+
+                "<td>" +
+                item.score +
+                "</td>";
+
+
+            tbody.appendChild(row);
+
+        }
+    );
+
+
+    document.getElementById(
+        "gameOverScreen"
+    ).style.display =
+        "flex";
+
+
+    updateHUD();
+
+}
+
+
+/* =========================
+   جلوگیری از HTML Injection
+========================= */
+
+function escapeHTML(text) {
+
+    return text.replace(
+        /[&<>"']/g,
+        function(character) {
+
+            return {
+
+                "&":"&amp;",
+                "<":"&lt;",
+                ">":"&gt;",
+                '"':"&quot;",
+                "'":"&#039;"
+
+            }[character];
+
+        }
+    );
+
+}
+
+
+/* =========================
+   حلقه بازی
+========================= */
+
+function gameLoop() {
+
+    if(!playing)
+        return;
+
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /*
+      پس‌زمینه
+    */
+
+    drawBackground();
+
+
+    /*
+      افزایش سختی
+    */
+
+    speed =
+        3.15 +
+        Math.min(
+            score*.055,
+            3.2
+        );
+
+
+    /*
+      فیزیک مرغابی
+    */
+
+    duck.velocity +=
+        duck.gravity;
+
+
+    duck.y +=
+        duck.velocity;
+
+
+    /*
+      ایجاد تونل جدید
+    */
+
+    spawnTimer -=
+        speed;
+
+
+    if(
+        spawnTimer<=0
+    ) {
+
+        createTunnel(
+            W+30
+        );
+
+
+        /*
+          با افزایش امتیاز
+          تونل‌ها نزدیک‌تر می‌شوند.
+        */
+
+        spawnTimer =
+            Math.max(
+                185,
+                285 -
+                score*2.1
+            );
+
+    }
+
+
+    /*
+      حرکت تونل‌ها
+    */
+
+    for(
+        let i=tunnels.length-1;
+        i>=0;
+        i--
+    ) {
+
+        const tunnel =
+            tunnels[i];
+
+
+        tunnel.x -=
+            speed;
+
+
+        /*
+          عبور موفق
+        */
+
+        if(
+            !tunnel.passed &&
+            tunnel.x+
+            tunnel.width<
+            duck.x
+        ) {
+
+            tunnel.passed =
+                true;
+
+
+            score++;
+
+
+            createParticles(
+                duck.x,
+                duck.y,
+                4
+            );
+
+
+            updateHUD();
+
+        }
+
+
+        /*
+          حذف تونل‌های قدیمی
+        */
+
+        if(
+            tunnel.x+
+            tunnel.width<
+            -30
+        ) {
+
+            tunnels.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    /*
+      حرکت سکه‌ها
+    */
+
+    for(
+        let i=coinObjects.length-1;
+        i>=0;
+        i--
+    ) {
+
+        coinObjects[i].x -=
+            speed;
+
+
+        if(
+            coinObjects[i].x<
+            -30
+        ) {
+
+            coinObjects.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    /*
+      رسم
+    */
+
+    tunnels.forEach(
+        drawTunnel
+    );
+
+
+    coinObjects.forEach(
+        drawCoin
+    );
+
+
+    drawGround();
+
+
+    collectCoins();
+
+
+    drawParticles();
+
+
+    drawDuck();
+
+
+    /*
+      برخورد
+    */
+
+    if(
+        collision()
+    ) {
+
+        loseLife();
+
+        if(!playing)
+            return;
+
+    }
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================
+   آماده‌سازی اولیه
+========================= */
+
+createClouds();
+
+drawBackground();
+
+drawGround();
+
+duck.x =
+    W*.25;
+
+duck.y =
+    H*.46;
+
+drawDuck();
+
+updateHUD();
+
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>پرواز مرغابی کوچولو</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Tahoma, Arial, sans-serif;
+    background: #87d8ff;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#gameWrapper {
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+    position: relative;
+    overflow: hidden;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+}
+
+/* طراح */
+#designer {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+
+    background: rgba(255,255,255,0.85);
+    color: #31566b;
+
+    padding: 7px 18px;
+    border-radius: 20px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+}
+
+/* اطلاعات بازی */
+#hud {
+    position: absolute;
+    top: 55px;
+    left: 0;
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    z-index: 5;
+    pointer-events: none;
+}
+
+.hudBox {
+    background: rgba(255,255,255,0.78);
+    color: #31566b;
+
+    padding: 7px 13px;
+    border-radius: 18px;
+
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* راهنما */
+#hint {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: rgba(255,255,255,0.72);
+    color: #4c7180;
+
+    padding: 7px 15px;
+    border-radius: 20px;
+
+    font-size: 11px;
+    white-space: nowrap;
+
+    z-index: 5;
+}
+
+/* صفحه‌ها */
+.screen {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(30,110,140,0.30);
+    backdrop-filter: blur(4px);
+
+    z-index: 20;
+}
+
+.panel {
+    width: min(92%, 440px);
+
+    padding: 30px 24px;
+
+    background: rgba(255,255,255,0.96);
+    border-radius: 30px;
+
+    text-align: center;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.duckEmoji {
+    font-size: 65px;
+
+    animation: floating 1.8s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-9px);
+    }
+}
+
+h1 {
+    color: #28657d;
+    margin: 8px 0;
+    font-size: 27px;
+}
+
+p {
+    color: #627b86;
+    line-height: 1.9;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+
+    padding: 13px;
+
+    border: 2px solid #c5e7f2;
+    border-radius: 15px;
+
+    outline: none;
+
+    text-align: center;
+
+    font-family: Tahoma;
+    font-size: 17px;
+}
+
+input:focus {
+    border-color: #62b7d2;
+}
+
+button {
+    border: none;
+
+    margin-top: 14px;
+
+    padding: 13px 30px;
+
+    border-radius: 15px;
+
+    background: #4eafd0;
+    color: white;
+
+    font-family: Tahoma;
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 5px 15px rgba(60,160,190,0.25);
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+#gameOverScreen {
+    display: none;
+}
+
+#result {
+    color: #456b78;
+    font-size: 17px;
+    line-height: 2;
+}
+
+.small {
+    color: #82949b;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+#leaderboard {
+    width: 100%;
+    margin-top: 15px;
+
+    border-collapse: collapse;
+
+    font-size: 12px;
+    color: #526e79;
+}
+
+#leaderboard td,
+#leaderboard th {
+    padding: 6px;
+    border-bottom: 1px solid #e2edef;
+}
+
+#leaderboard th {
+    color: #33738a;
+}
+
+
+/* موبایل */
+@media(max-width:520px) {
+
+    #designer {
+        top: 7px;
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+
+    #hud {
+        top: 42px;
+    }
+
+    .hudBox {
+        font-size: 11px;
+        padding: 6px 9px;
+    }
+
+    .panel {
+        padding: 24px 18px;
+    }
+
+    h1 {
+        font-size: 23px;
+    }
+
+    .duckEmoji {
+        font-size: 55px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="gameWrapper">
+
+<canvas id="game"></canvas>
+
+<div id="designer">
+    طراح: ایناز طیاری
+</div>
+
+<div id="hud">
+
+    <div class="hudBox">
+        بازیکن: <span id="playerHud">-</span>
+    </div>
+
+    <div class="hudBox">
+        امتیاز: <span id="score">0</span>
+    </div>
+
+    <div class="hudBox">
+        🏆 رکورد: <span id="best">0</span>
+    </div>
+
+    <div class="hudBox">
+        ❤️ <span id="lives">3</span>
+    </div>
+
+    <div class="hudBox">
+        🪙 <span id="coins">0</span>
+    </div>
+
+</div>
+
+<div id="hint">
+    لمس صفحه / کلیک / Space = پرواز 🪽
+</div>
+
+
+<!-- صفحه شروع -->
+
+<div id="startScreen" class="screen">
+
+    <div class="panel">
+
+        <div class="duckEmoji">
+            🦆
+        </div>
+
+        <h1>
+            پرواز مرغابی کوچولو
+        </h1>
+
+        <p>
+            مرغابی کوچولو بقچه‌اش را برداشته و آماده‌ی پرواز است! 🧺
+            <br>
+            از تونل‌ها رد شو، سکه جمع کن و رکورد بزن.
+        </p>
+
+        <input
+            id="playerName"
+            maxlength="20"
+            placeholder="اسم شرکت‌کننده"
+            autocomplete="off"
+        >
+
+        <br>
+
+        <button onclick="startGame()">
+            شروع مسابقه ✨
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- صفحه پایان -->
+
+<div id="gameOverScreen" class="screen">
+
+    <div class="panel">
+
+        <div class="duckEmoji">
+            💫🦆
+        </div>
+
+        <h1>
+            پرواز تمام شد!
+        </h1>
+
+        <div id="result"></div>
+
+        <div id="recordMessage" class="small"></div>
+
+        <table id="leaderboard">
+
+            <thead>
+
+                <tr>
+                    <th>رتبه</th>
+                    <th>شرکت‌کننده</th>
+                    <th>امتیاز</th>
+                </tr>
+
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+
+        <button onclick="restartGame()">
+            دوباره بازی کن 🔄
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   تنظیمات اصلی
+========================= */
+
+const canvas =
+    document.getElementById("game");
+
+const ctx =
+    canvas.getContext("2d");
+
+let W;
+let H;
+let DPR;
+
+let playing = false;
+
+let score = 0;
+let coins = 0;
+let lives = 3;
+
+let speed = 3.2;
+
+let spawnTimer = 0;
+
+let playerName = "";
+
+let best =
+    Number(localStorage.getItem("duckBest") || 0);
+
+document.getElementById("best").textContent =
+    best;
+
+
+/* =========================
+   مرغابی
+========================= */
+
+const duck = {
+
+    x: 0,
+
+    y: 0,
+
+    width: 55,
+
+    height: 40,
+
+    velocity: 0,
+
+    gravity: 0.43,
+
+    jump: -7.6,
+
+    rotation: 0
+
+};
+
+
+/* =========================
+   تونل‌ها
+========================= */
+
+let tunnels = [];
+
+
+/* =========================
+   سکه‌ها
+========================= */
+
+let coinObjects = [];
+
+
+/* =========================
+   ابرها
+========================= */
+
+let clouds = [];
+
+
+/* =========================
+   ذرات
+========================= */
+
+let particles = [];
+
+
+/* =========================
+   تغییر اندازه
+========================= */
+
+function resizeCanvas() {
+
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
+
+    DPR =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+    canvas.width =
+        W * DPR;
+
+    canvas.height =
+        H * DPR;
+
+    ctx.setTransform(
+        DPR,
+        0,
+        0,
+        DPR,
+        0,
+        0
+    );
+}
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+resizeCanvas();
+
+
+/* =========================
+   عدد تصادفی
+========================= */
+
+function random(min,max) {
+
+    return min +
+        Math.random() *
+        (max-min);
+}
+
+
+/* =========================
+   HUD
+========================= */
+
+function updateHUD() {
+
+    document.getElementById(
+        "playerHud"
+    ).textContent = playerName;
+
+    document.getElementById(
+        "score"
+    ).textContent = score;
+
+    document.getElementById(
+        "coins"
+    ).textContent = coins;
+
+    document.getElementById(
+        "lives"
+    ).textContent = lives;
+
+    document.getElementById(
+        "best"
+    ).textContent = best;
+}
+
+
+/* =========================
+   ابرها
+========================= */
+
+function createClouds() {
+
+    clouds = [];
+
+    for(let i=0;i<8;i++) {
+
+        clouds.push({
+
+            x: random(0,W),
+
+            y: random(50,H*0.55),
+
+            scale: random(.45,1.1),
+
+            speed: random(.08,.22)
+
+        });
+
+    }
+}
+
+
+/* =========================
+   شروع بازی
+========================= */
+
+function startGame() {
+
+    const input =
+        document.getElementById(
+            "playerName"
+        );
+
+    playerName =
+        input.value.trim();
+
+    if(!playerName) {
+
+        input.style.borderColor =
+            "#e87979";
+
+        input.focus();
+
+        return;
+    }
+
+    input.style.borderColor =
+        "#c5e7f2";
+
+
+    document.getElementById(
+        "startScreen"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "gameOverScreen"
+    ).style.display = "none";
+
+
+    score = 0;
+
+    coins = 0;
+
+    lives = 3;
+
+    speed = 3.2;
+
+    spawnTimer = 0;
+
+    tunnels = [];
+
+    coinObjects = [];
+
+    particles = [];
+
+
+    duck.x =
+        W * 0.25;
+
+    duck.y =
+        H * 0.46;
+
+    duck.velocity =
+        0;
+
+
+    createClouds();
+
+    updateHUD();
+
+    playing = true;
+
+
+    createTunnel(
+        W + 100
+    );
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+}
+
+
+/* =========================
+   شروع دوباره
+========================= */
+
+function restartGame() {
+
+    startGame();
+}
+
+
+/* =========================
+   پرواز
+========================= */
+
+function flap() {
+
+    if(!playing)
+        return;
+
+    duck.velocity =
+        duck.jump;
+}
+
+
+/* =========================
+   کنترل کیبورد
+========================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if(
+            event.code === "Space" ||
+            event.code === "ArrowUp"
+        ) {
+
+            event.preventDefault();
+
+            flap();
+        }
+
+    }
+);
+
+
+/* =========================
+   کنترل موبایل
+========================= */
+
+canvas.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+
+        flap();
+    }
+);
+
+
+/* =========================
+   ساخت تونل
+========================= */
+
+function createTunnel(x) {
+
+    /*
+      هرچه امتیاز بیشتر شود،
+      فاصله‌ی تونل کمتر می‌شود.
+    */
+
+    let difficulty =
+        Math.min(
+            score * 1.35,
+            H * .23
+        );
+
+
+    let gap =
+        H * .42 -
+        difficulty;
+
+
+    /*
+      حداقل فاصله‌ی تونل
+    */
+
+    gap =
+        Math.max(
+            95,
+            gap
+        );
+
+
+    const minTop = 70;
+
+    const maxTop =
+        Math.max(
+            minTop + 10,
+            H - 55 - gap
+        );
+
+
+    const top =
+        random(
+            minTop,
+            maxTop
+        );
+
+
+    tunnels.push({
+
+        x: x,
+
+        width: 78,
+
+        top: top,
+
+        gap: gap,
+
+        passed: false
+
+    });
+
+
+    /*
+      گاهی داخل تونل سکه می‌گذاریم.
+    */
+
+    if(Math.random() < .85) {
+
+        coinObjects.push({
+
+            x: x + 39,
+
+            y: top + gap/2,
+
+            radius: 9,
+
+            collected: false,
+
+            phase: random(0,6)
+
+        });
+
+    }
+
+}
+
+
+/* =========================
+   پس‌زمینه
+========================= */
+
+function drawBackground() {
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#78d4ff"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#e1f8ff"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /*
+      خورشید
+    */
+
+    ctx.fillStyle =
+        "#ffe68c";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        W*.82,
+        H*.18,
+        38,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      ابرها
+    */
+
+    clouds.forEach(
+        function(cloud) {
+
+            cloud.x -=
+                cloud.speed;
+
+
+            if(
+                cloud.x <
+                -100
+            ) {
+
+                cloud.x =
+                    W + 100;
+            }
+
+
+            drawCloud(
+                cloud
+            );
+
+        }
+    );
+
+
+    /*
+      کوه‌های دور
+    */
+
+    ctx.fillStyle =
+        "#b9e4a0";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        H-95
+    );
+
+
+    for(
+        let x=0;
+        x<=W;
+        x+=55
+    ) {
+
+        ctx.lineTo(
+            x,
+            H-95-
+            random(0,30)
+        );
+
+    }
+
+
+    ctx.lineTo(
+        W,
+        H-35
+    );
+
+    ctx.lineTo(
+        0,
+        H-35
+    );
+
+    ctx.fill();
+
+}
+
+
+/* =========================
+   ابر
+========================= */
+
+function drawCloud(cloud) {
+
+    ctx.save();
+
+    ctx.translate(
+        cloud.x,
+        cloud.y
+    );
+
+    ctx.scale(
+        cloud.scale,
+        cloud.scale
+    );
+
+
+    ctx.fillStyle =
+        "rgba(255,255,255,.72)";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        -27,
+        5,
+        18,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.arc(
+        0,
+        -7,
+        25,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.arc(
+        28,
+        6,
+        17,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.fillRect(
+        -44,
+        5,
+        88,
+        18
+    );
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   زمین
+========================= */
+
+function drawGround() {
+
+    ctx.fillStyle =
+        "#91cf68";
+
+
+    ctx.fillRect(
+        0,
+        H-35,
+        W,
+        35
+    );
+
+
+    ctx.fillStyle =
+        "#67ad50";
+
+
+    for(
+        let x=0;
+        x<W+30;
+        x+=22
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            H-35
+        );
+
+        ctx.lineTo(
+            x+8,
+            H-45
+        );
+
+        ctx.lineTo(
+            x+13,
+            H-35
+        );
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =========================
+   تونل
+========================= */
+
+function drawTunnel(tunnel) {
+
+    const bottom =
+        tunnel.top +
+        tunnel.gap;
+
+
+    const gradient =
+        ctx.createLinearGradient(
+            tunnel.x,
+            0,
+            tunnel.x+tunnel.width,
+            0
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#4d9b58"
+    );
+
+
+    gradient.addColorStop(
+        .5,
+        "#a0df80"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#3d864c"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    /*
+      تونل بالا
+    */
+
+    ctx.fillRect(
+        tunnel.x,
+        0,
+        tunnel.width,
+        tunnel.top
+    );
+
+
+    /*
+      تونل پایین
+    */
+
+    ctx.fillRect(
+        tunnel.x,
+        bottom,
+        tunnel.width,
+        H-35-bottom
+    );
+
+
+    /*
+      لبه‌ها
+    */
+
+    ctx.fillStyle =
+        "#347743";
+
+
+    ctx.fillRect(
+        tunnel.x-6,
+        tunnel.top-15,
+        tunnel.width+12,
+        15
+    );
+
+
+    ctx.fillRect(
+        tunnel.x-6,
+        bottom,
+        tunnel.width+12,
+        15
+    );
+
+
+    /*
+      برگ‌ها
+    */
+
+    ctx.fillStyle =
+        "#c1ee99";
+
+
+    for(
+        let y=35;
+        y<tunnel.top-18;
+        y+=47
+    ) {
+
+        ctx.beginPath();
+
+
+        ctx.ellipse(
+            tunnel.x+18,
+            y,
+            10,
+            5,
+            -.5,
+            0,
+            Math.PI*2
+        );
+
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =========================
+   سکه
+========================= */
+
+function drawCoin(coin) {
+
+    if(coin.collected)
+        return;
+
+
+    coin.phase += .08;
+
+
+    const scale =
+        1 +
+        Math.sin(
+            coin.phase
+        )*.08;
+
+
+    ctx.save();
+
+
+    ctx.translate(
+        coin.x,
+        coin.y
+    );
+
+
+    ctx.scale(
+        scale,
+        scale
+    );
+
+
+    ctx.fillStyle =
+        "#ffd35c";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        0,
+        0,
+        coin.radius,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.strokeStyle =
+        "#e4a43c";
+
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.stroke();
+
+
+    ctx.fillStyle =
+        "#fff0a1";
+
+
+    ctx.font =
+        "bold 11px Arial";
+
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.textBaseline =
+        "middle";
+
+
+    ctx.fillText(
+        "★",
+        0,
+        1
+    );
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   مرغابی
+========================= */
+
+function drawDuck() {
+
+    ctx.save();
+
+
+    ctx.translate(
+        duck.x,
+        duck.y
+    );
+
+
+    duck.rotation =
+        Math.max(
+            -.35,
+            Math.min(
+                duck.velocity*.055,
+                .55
+            )
+        );
+
+
+    ctx.rotate(
+        duck.rotation
+    );
+
+
+    /*
+      نخ بقچه
+    */
+
+    ctx.strokeStyle =
+        "#8c6572";
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        40,
+        -2
+    );
+
+
+    ctx.lineTo(
+        59,
+        -10
+    );
+
+
+    ctx.stroke();
+
+
+    /*
+      بدن
+    */
+
+    ctx.fillStyle =
+        "#fff1a4";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        0,
+        0,
+        28,
+        19,
+        0,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      بال
+    */
+
+    ctx.fillStyle =
+        "#dfc96f";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        -5,
+        5,
+        16,
+        8,
+        -.3,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      سر
+    */
+
+    ctx.fillStyle =
+        "#fff5b8";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        22,
+        -14,
+        17,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        29,
+        -19,
+        13,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      چشم
+    */
+
+    ctx.fillStyle =
+        "#26373d";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        33,
+        -23,
+        2.7,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      منقار
+    */
+
+    ctx.fillStyle =
+        "#efa03a";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        39,
+        -17
+    );
+
+
+    ctx.lineTo(
+        56,
+        -12
+    );
+
+
+    ctx.lineTo(
+        39,
+        -7
+    );
+
+
+    ctx.closePath();
+
+
+    ctx.fill();
+
+
+    /*
+      بقچه
+    */
+
+    ctx.save();
+
+
+    ctx.translate(
+        48,
+        -3
+    );
+
+
+    ctx.rotate(.12);
+
+
+    ctx.fillStyle =
+        "#d986a6";
+
+
+    ctx.beginPath();
+
+
+    ctx.roundRect(
+        -7,
+        -8,
+        20,
+        14,
+        4
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      بند بقچه
+    */
+
+    ctx.strokeStyle =
+        "#f1c477";
+
+
+    ctx.lineWidth =
+        3;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        -7,
+        -3
+    );
+
+
+    ctx.lineTo(
+        13,
+        -3
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+
+    /*
+      پاها
+    */
+
+    ctx.strokeStyle =
+        "#e59635";
+
+
+    ctx.lineWidth =
+        3;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        -7,
+        16
+    );
+
+
+    ctx.lineTo(
+        -10,
+        27
+    );
+
+
+    ctx.moveTo(
+        7,
+        16
+    );
+
+
+    ctx.lineTo(
+        10,
+        27
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   ذرات
+========================= */
+
+function createParticles(
+    x,
+    y,
+    amount
+) {
+
+    for(
+        let i=0;
+        i<amount;
+        i++
+    ) {
+
+        particles.push({
+
+            x:x,
+
+            y:y,
+
+            vx:random(-2,2),
+
+            vy:random(-2,2),
+
+            life:random(15,30),
+
+            radius:random(1,3)
+
+        });
+
+    }
+
+}
+
+
+function drawParticles() {
+
+    for(
+        let i=particles.length-1;
+        i>=0;
+        i--
+    ) {
+
+        const p =
+            particles[i];
+
+
+        p.x += p.vx;
+
+        p.y += p.vy;
+
+        p.vy += .05;
+
+        p.life--;
+
+
+        ctx.globalAlpha =
+            Math.max(
+                0,
+                p.life/30
+            );
+
+
+        ctx.fillStyle =
+            "#ffffff";
+
+
+        ctx.beginPath();
+
+
+        ctx.arc(
+            p.x,
+            p.y,
+            p.radius,
+            0,
+            Math.PI*2
+        );
+
+
+        ctx.fill();
+
+
+        ctx.globalAlpha =
+            1;
+
+
+        if(
+            p.life<=0
+        ) {
+
+            particles.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   برخورد
+========================= */
+
+function collision() {
+
+    const left =
+        duck.x-23;
+
+    const right =
+        duck.x+29;
+
+    const top =
+        duck.y-17;
+
+    const bottom =
+        duck.y+20;
+
+
+    /*
+      سقف و زمین
+    */
+
+    if(
+        top<=0 ||
+        bottom>=H-35
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+      تونل‌ها
+    */
+
+    for(
+        const tunnel
+        of tunnels
+    ) {
+
+        if(
+            right>tunnel.x &&
+            left<
+            tunnel.x+tunnel.width
+        ) {
+
+            if(
+                top<tunnel.top ||
+                bottom>
+                tunnel.top+
+                tunnel.gap
+            ) {
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================
+   گرفتن سکه
+========================= */
+
+function collectCoins() {
+
+    for(
+        const coin
+        of coinObjects
+    ) {
+
+        if(
+            coin.collected
+        )
+            continue;
+
+
+        const distance =
+            Math.hypot(
+                duck.x-coin.x,
+                duck.y-coin.y
+            );
+
+
+        if(
+            distance<25
+        ) {
+
+            coin.collected =
+                true;
+
+
+            coins++;
+
+
+            createParticles(
+                coin.x,
+                coin.y,
+                10
+            );
+
+
+            updateHUD();
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   از دست دادن جان
+========================= */
+
+function loseLife() {
+
+    lives--;
+
+    createParticles(
+        duck.x,
+        duck.y,
+        15
+    );
+
+
+    updateHUD();
+
+
+    if(
+        lives<=0
+    ) {
+
+        gameOver();
+
+        return;
+
+    }
+
+
+    /*
+      برگشت به مسیر
+    */
+
+    duck.x =
+        W*.25;
+
+    duck.y =
+        H*.46;
+
+    duck.velocity =
+        -5;
+
+
+    /*
+      تونل‌های خیلی نزدیک حذف شوند
+    */
+
+    tunnels =
+        tunnels.filter(
+            tunnel =>
+                tunnel.x>
+                duck.x+100
+        );
+
+}
+
+
+/* =========================
+   ذخیره امتیاز
+========================= */
+
+function saveScore() {
+
+    let scores =
+        JSON.parse(
+            localStorage.getItem(
+                "duckScores"
+            ) || "[]"
+        );
+
+
+    scores.push({
+
+        name:playerName,
+
+        score:score,
+
+        coins:coins,
+
+        date:Date.now()
+
+    });
+
+
+    scores.sort(
+        (a,b) =>
+            b.score-a.score
+    );
+
+
+    scores =
+        scores.slice(
+            0,
+            10
+        );
+
+
+    localStorage.setItem(
+        "duckScores",
+        JSON.stringify(scores)
+    );
+
+
+    return scores;
+
+}
+
+
+/* =========================
+   پایان بازی
+========================= */
+
+function gameOver() {
+
+    playing =
+        false;
+
+
+    const oldBest =
+        best;
+
+
+    if(
+        score>best
+    ) {
+
+        best =
+            score;
+
+
+        localStorage.setItem(
+            "duckBest",
+            best
+        );
+
+    }
+
+
+    const scores =
+        saveScore();
+
+
+    document.getElementById(
+        "result"
+    ).innerHTML =
+        playerName +
+        "، امتیاز شما <b>" +
+        score +
+        "</b> بود.<br>" +
+        "🪙 سکه‌ها: <b>" +
+        coins +
+        "</b>";
+
+
+    document.getElementById(
+        "recordMessage"
+    ).textContent =
+        score>oldBest
+        ? "🎉 رکورد جدید!"
+        : "🏆 رکورد فعلی: " + best;
+
+
+    const tbody =
+        document.querySelector(
+            "#leaderboard tbody"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    scores.forEach(
+        function(item,index) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML =
+                "<td>" +
+                (index+1) +
+                "</td>" +
+
+                "<td>" +
+                escapeHTML(
+                    item.name
+                ) +
+                "</td>" +
+
+                "<td>" +
+                item.score +
+                "</td>";
+
+
+            tbody.appendChild(row);
+
+        }
+    );
+
+
+    document.getElementById(
+        "gameOverScreen"
+    ).style.display =
+        "flex";
+
+
+    updateHUD();
+
+}
+
+
+/* =========================
+   جلوگیری از HTML Injection
+========================= */
+
+function escapeHTML(text) {
+
+    return text.replace(
+        /[&<>"']/g,
+        function(character) {
+
+            return {
+
+                "&":"&amp;",
+                "<":"&lt;",
+                ">":"&gt;",
+                '"':"&quot;",
+                "'":"&#039;"
+
+            }[character];
+
+        }
+    );
+
+}
+
+
+/* =========================
+   حلقه بازی
+========================= */
+
+function gameLoop() {
+
+    if(!playing)
+        return;
+
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /*
+      پس‌زمینه
+    */
+
+    drawBackground();
+
+
+    /*
+      افزایش سختی
+    */
+
+    speed =
+        3.15 +
+        Math.min(
+            score*.055,
+            3.2
+        );
+
+
+    /*
+      فیزیک مرغابی
+    */
+
+    duck.velocity +=
+        duck.gravity;
+
+
+    duck.y +=
+        duck.velocity;
+
+
+    /*
+      ایجاد تونل جدید
+    */
+
+    spawnTimer -=
+        speed;
+
+
+    if(
+        spawnTimer<=0
+    ) {
+
+        createTunnel(
+            W+30
+        );
+
+
+        /*
+          با افزایش امتیاز
+          تونل‌ها نزدیک‌تر می‌شوند.
+        */
+
+        spawnTimer =
+            Math.max(
+                185,
+                285 -
+                score*2.1
+            );
+
+    }
+
+
+    /*
+      حرکت تونل‌ها
+    */
+
+    for(
+        let i=tunnels.length-1;
+        i>=0;
+        i--
+    ) {
+
+        const tunnel =
+            tunnels[i];
+
+
+        tunnel.x -=
+            speed;
+
+
+        /*
+          عبور موفق
+        */
+
+        if(
+            !tunnel.passed &&
+            tunnel.x+
+            tunnel.width<
+            duck.x
+        ) {
+
+            tunnel.passed =
+                true;
+
+
+            score++;
+
+
+            createParticles(
+                duck.x,
+                duck.y,
+                4
+            );
+
+
+            updateHUD();
+
+        }
+
+
+        /*
+          حذف تونل‌های قدیمی
+        */
+
+        if(
+            tunnel.x+
+            tunnel.width<
+            -30
+        ) {
+
+            tunnels.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    /*
+      حرکت سکه‌ها
+    */
+
+    for(
+        let i=coinObjects.length-1;
+        i>=0;
+        i--
+    ) {
+
+        coinObjects[i].x -=
+            speed;
+
+
+        if(
+            coinObjects[i].x<
+            -30
+        ) {
+
+            coinObjects.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    /*
+      رسم
+    */
+
+    tunnels.forEach(
+        drawTunnel
+    );
+
+
+    coinObjects.forEach(
+        drawCoin
+    );
+
+
+    drawGround();
+
+
+    collectCoins();
+
+
+    drawParticles();
+
+
+    drawDuck();
+
+
+    /*
+      برخورد
+    */
+
+    if(
+        collision()
+    ) {
+
+        loseLife();
+
+        if(!playing)
+            return;
+
+    }
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================
+   آماده‌سازی اولیه
+========================= */
+
+createClouds();
+
+drawBackground();
+
+drawGround();
+
+duck.x =
+    W*.25;
+
+duck.y =
+    H*.46;
+
+drawDuck();
+
+updateHUD();
+
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>پرواز مرغابی کوچولو</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Tahoma, Arial, sans-serif;
+    background: #87d8ff;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#gameWrapper {
+    width: 100%;
+    height: 100%;
+    max-width: 1200px;
+    position: relative;
+    overflow: hidden;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+}
+
+/* طراح */
+#designer {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+
+    background: rgba(255,255,255,0.85);
+    color: #31566b;
+
+    padding: 7px 18px;
+    border-radius: 20px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+}
+
+/* اطلاعات بازی */
+#hud {
+    position: absolute;
+    top: 55px;
+    left: 0;
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    z-index: 5;
+    pointer-events: none;
+}
+
+.hudBox {
+    background: rgba(255,255,255,0.78);
+    color: #31566b;
+
+    padding: 7px 13px;
+    border-radius: 18px;
+
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* راهنما */
+#hint {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: rgba(255,255,255,0.72);
+    color: #4c7180;
+
+    padding: 7px 15px;
+    border-radius: 20px;
+
+    font-size: 11px;
+    white-space: nowrap;
+
+    z-index: 5;
+}
+
+/* صفحه‌ها */
+.screen {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(30,110,140,0.30);
+    backdrop-filter: blur(4px);
+
+    z-index: 20;
+}
+
+.panel {
+    width: min(92%, 440px);
+
+    padding: 30px 24px;
+
+    background: rgba(255,255,255,0.96);
+    border-radius: 30px;
+
+    text-align: center;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+
+.duckEmoji {
+    font-size: 65px;
+
+    animation: floating 1.8s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-9px);
+    }
+}
+
+h1 {
+    color: #28657d;
+    margin: 8px 0;
+    font-size: 27px;
+}
+
+p {
+    color: #627b86;
+    line-height: 1.9;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+
+    padding: 13px;
+
+    border: 2px solid #c5e7f2;
+    border-radius: 15px;
+
+    outline: none;
+
+    text-align: center;
+
+    font-family: Tahoma;
+    font-size: 17px;
+}
+
+input:focus {
+    border-color: #62b7d2;
+}
+
+button {
+    border: none;
+
+    margin-top: 14px;
+
+    padding: 13px 30px;
+
+    border-radius: 15px;
+
+    background: #4eafd0;
+    color: white;
+
+    font-family: Tahoma;
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow: 0 5px 15px rgba(60,160,190,0.25);
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+#gameOverScreen {
+    display: none;
+}
+
+#result {
+    color: #456b78;
+    font-size: 17px;
+    line-height: 2;
+}
+
+.small {
+    color: #82949b;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+#leaderboard {
+    width: 100%;
+    margin-top: 15px;
+
+    border-collapse: collapse;
+
+    font-size: 12px;
+    color: #526e79;
+}
+
+#leaderboard td,
+#leaderboard th {
+    padding: 6px;
+    border-bottom: 1px solid #e2edef;
+}
+
+#leaderboard th {
+    color: #33738a;
+}
+
+
+/* موبایل */
+@media(max-width:520px) {
+
+    #designer {
+        top: 7px;
+        font-size: 11px;
+        padding: 6px 12px;
+    }
+
+    #hud {
+        top: 42px;
+    }
+
+    .hudBox {
+        font-size: 11px;
+        padding: 6px 9px;
+    }
+
+    .panel {
+        padding: 24px 18px;
+    }
+
+    h1 {
+        font-size: 23px;
+    }
+
+    .duckEmoji {
+        font-size: 55px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="gameWrapper">
+
+<canvas id="game"></canvas>
+
+<div id="designer">
+    طراح: ایناز طیاری
+</div>
+
+<div id="hud">
+
+    <div class="hudBox">
+        بازیکن: <span id="playerHud">-</span>
+    </div>
+
+    <div class="hudBox">
+        امتیاز: <span id="score">0</span>
+    </div>
+
+    <div class="hudBox">
+        🏆 رکورد: <span id="best">0</span>
+    </div>
+
+    <div class="hudBox">
+        ❤️ <span id="lives">3</span>
+    </div>
+
+    <div class="hudBox">
+        🪙 <span id="coins">0</span>
+    </div>
+
+</div>
+
+<div id="hint">
+    لمس صفحه / کلیک / Space = پرواز 🪽
+</div>
+
+
+<!-- صفحه شروع -->
+
+<div id="startScreen" class="screen">
+
+    <div class="panel">
+
+        <div class="duckEmoji">
+            🦆
+        </div>
+
+        <h1>
+            پرواز مرغابی کوچولو
+        </h1>
+
+        <p>
+            مرغابی کوچولو بقچه‌اش را برداشته و آماده‌ی پرواز است! 🧺
+            <br>
+            از تونل‌ها رد شو، سکه جمع کن و رکورد بزن.
+        </p>
+
+        <input
+            id="playerName"
+            maxlength="20"
+            placeholder="اسم شرکت‌کننده"
+            autocomplete="off"
+        >
+
+        <br>
+
+        <button onclick="startGame()">
+            شروع مسابقه ✨
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- صفحه پایان -->
+
+<div id="gameOverScreen" class="screen">
+
+    <div class="panel">
+
+        <div class="duckEmoji">
+            💫🦆
+        </div>
+
+        <h1>
+            پرواز تمام شد!
+        </h1>
+
+        <div id="result"></div>
+
+        <div id="recordMessage" class="small"></div>
+
+        <table id="leaderboard">
+
+            <thead>
+
+                <tr>
+                    <th>رتبه</th>
+                    <th>شرکت‌کننده</th>
+                    <th>امتیاز</th>
+                </tr>
+
+            </thead>
+
+            <tbody></tbody>
+
+        </table>
+
+        <button onclick="restartGame()">
+            دوباره بازی کن 🔄
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   تنظیمات اصلی
+========================= */
+
+const canvas =
+    document.getElementById("game");
+
+const ctx =
+    canvas.getContext("2d");
+
+let W;
+let H;
+let DPR;
+
+let playing = false;
+
+let score = 0;
+let coins = 0;
+let lives = 3;
+
+let speed = 3.2;
+
+let spawnTimer = 0;
+
+let playerName = "";
+
+let best =
+    Number(localStorage.getItem("duckBest") || 0);
+
+document.getElementById("best").textContent =
+    best;
+
+
+/* =========================
+   مرغابی
+========================= */
+
+const duck = {
+
+    x: 0,
+
+    y: 0,
+
+    width: 55,
+
+    height: 40,
+
+    velocity: 0,
+
+    gravity: 0.43,
+
+    jump: -7.6,
+
+    rotation: 0
+
+};
+
+
+/* =========================
+   تونل‌ها
+========================= */
+
+let tunnels = [];
+
+
+/* =========================
+   سکه‌ها
+========================= */
+
+let coinObjects = [];
+
+
+/* =========================
+   ابرها
+========================= */
+
+let clouds = [];
+
+
+/* =========================
+   ذرات
+========================= */
+
+let particles = [];
+
+
+/* =========================
+   تغییر اندازه
+========================= */
+
+function resizeCanvas() {
+
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
+
+    DPR =
+        Math.min(
+            window.devicePixelRatio || 1,
+            2
+        );
+
+    canvas.width =
+        W * DPR;
+
+    canvas.height =
+        H * DPR;
+
+    ctx.setTransform(
+        DPR,
+        0,
+        0,
+        DPR,
+        0,
+        0
+    );
+}
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+resizeCanvas();
+
+
+/* =========================
+   عدد تصادفی
+========================= */
+
+function random(min,max) {
+
+    return min +
+        Math.random() *
+        (max-min);
+}
+
+
+/* =========================
+   HUD
+========================= */
+
+function updateHUD() {
+
+    document.getElementById(
+        "playerHud"
+    ).textContent = playerName;
+
+    document.getElementById(
+        "score"
+    ).textContent = score;
+
+    document.getElementById(
+        "coins"
+    ).textContent = coins;
+
+    document.getElementById(
+        "lives"
+    ).textContent = lives;
+
+    document.getElementById(
+        "best"
+    ).textContent = best;
+}
+
+
+/* =========================
+   ابرها
+========================= */
+
+function createClouds() {
+
+    clouds = [];
+
+    for(let i=0;i<8;i++) {
+
+        clouds.push({
+
+            x: random(0,W),
+
+            y: random(50,H*0.55),
+
+            scale: random(.45,1.1),
+
+            speed: random(.08,.22)
+
+        });
+
+    }
+}
+
+
+/* =========================
+   شروع بازی
+========================= */
+
+function startGame() {
+
+    const input =
+        document.getElementById(
+            "playerName"
+        );
+
+    playerName =
+        input.value.trim();
+
+    if(!playerName) {
+
+        input.style.borderColor =
+            "#e87979";
+
+        input.focus();
+
+        return;
+    }
+
+    input.style.borderColor =
+        "#c5e7f2";
+
+
+    document.getElementById(
+        "startScreen"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "gameOverScreen"
+    ).style.display = "none";
+
+
+    score = 0;
+
+    coins = 0;
+
+    lives = 3;
+
+    speed = 3.2;
+
+    spawnTimer = 0;
+
+    tunnels = [];
+
+    coinObjects = [];
+
+    particles = [];
+
+
+    duck.x =
+        W * 0.25;
+
+    duck.y =
+        H * 0.46;
+
+    duck.velocity =
+        0;
+
+
+    createClouds();
+
+    updateHUD();
+
+    playing = true;
+
+
+    createTunnel(
+        W + 100
+    );
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+}
+
+
+/* =========================
+   شروع دوباره
+========================= */
+
+function restartGame() {
+
+    startGame();
+}
+
+
+/* =========================
+   پرواز
+========================= */
+
+function flap() {
+
+    if(!playing)
+        return;
+
+    duck.velocity =
+        duck.jump;
+}
+
+
+/* =========================
+   کنترل کیبورد
+========================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if(
+            event.code === "Space" ||
+            event.code === "ArrowUp"
+        ) {
+
+            event.preventDefault();
+
+            flap();
+        }
+
+    }
+);
+
+
+/* =========================
+   کنترل موبایل
+========================= */
+
+canvas.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+
+        flap();
+    }
+);
+
+
+/* =========================
+   ساخت تونل
+========================= */
+
+function createTunnel(x) {
+
+    /*
+      هرچه امتیاز بیشتر شود،
+      فاصله‌ی تونل کمتر می‌شود.
+    */
+
+    let difficulty =
+        Math.min(
+            score * 1.35,
+            H * .23
+        );
+
+
+    let gap =
+        H * .42 -
+        difficulty;
+
+
+    /*
+      حداقل فاصله‌ی تونل
+    */
+
+    gap =
+        Math.max(
+            95,
+            gap
+        );
+
+
+    const minTop = 70;
+
+    const maxTop =
+        Math.max(
+            minTop + 10,
+            H - 55 - gap
+        );
+
+
+    const top =
+        random(
+            minTop,
+            maxTop
+        );
+
+
+    tunnels.push({
+
+        x: x,
+
+        width: 78,
+
+        top: top,
+
+        gap: gap,
+
+        passed: false
+
+    });
+
+
+    /*
+      گاهی داخل تونل سکه می‌گذاریم.
+    */
+
+    if(Math.random() < .85) {
+
+        coinObjects.push({
+
+            x: x + 39,
+
+            y: top + gap/2,
+
+            radius: 9,
+
+            collected: false,
+
+            phase: random(0,6)
+
+        });
+
+    }
+
+}
+
+
+/* =========================
+   پس‌زمینه
+========================= */
+
+function drawBackground() {
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#78d4ff"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#e1f8ff"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /*
+      خورشید
+    */
+
+    ctx.fillStyle =
+        "#ffe68c";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        W*.82,
+        H*.18,
+        38,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      ابرها
+    */
+
+    clouds.forEach(
+        function(cloud) {
+
+            cloud.x -=
+                cloud.speed;
+
+
+            if(
+                cloud.x <
+                -100
+            ) {
+
+                cloud.x =
+                    W + 100;
+            }
+
+
+            drawCloud(
+                cloud
+            );
+
+        }
+    );
+
+
+    /*
+      کوه‌های دور
+    */
+
+    ctx.fillStyle =
+        "#b9e4a0";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        H-95
+    );
+
+
+    for(
+        let x=0;
+        x<=W;
+        x+=55
+    ) {
+
+        ctx.lineTo(
+            x,
+            H-95-
+            random(0,30)
+        );
+
+    }
+
+
+    ctx.lineTo(
+        W,
+        H-35
+    );
+
+    ctx.lineTo(
+        0,
+        H-35
+    );
+
+    ctx.fill();
+
+}
+
+
+/* =========================
+   ابر
+========================= */
+
+function drawCloud(cloud) {
+
+    ctx.save();
+
+    ctx.translate(
+        cloud.x,
+        cloud.y
+    );
+
+    ctx.scale(
+        cloud.scale,
+        cloud.scale
+    );
+
+
+    ctx.fillStyle =
+        "rgba(255,255,255,.72)";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        -27,
+        5,
+        18,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.arc(
+        0,
+        -7,
+        25,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.arc(
+        28,
+        6,
+        17,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.fillRect(
+        -44,
+        5,
+        88,
+        18
+    );
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   زمین
+========================= */
+
+function drawGround() {
+
+    ctx.fillStyle =
+        "#91cf68";
+
+
+    ctx.fillRect(
+        0,
+        H-35,
+        W,
+        35
+    );
+
+
+    ctx.fillStyle =
+        "#67ad50";
+
+
+    for(
+        let x=0;
+        x<W+30;
+        x+=22
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            H-35
+        );
+
+        ctx.lineTo(
+            x+8,
+            H-45
+        );
+
+        ctx.lineTo(
+            x+13,
+            H-35
+        );
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =========================
+   تونل
+========================= */
+
+function drawTunnel(tunnel) {
+
+    const bottom =
+        tunnel.top +
+        tunnel.gap;
+
+
+    const gradient =
+        ctx.createLinearGradient(
+            tunnel.x,
+            0,
+            tunnel.x+tunnel.width,
+            0
+        );
+
+
+    gradient.addColorStop(
+        0,
+        "#4d9b58"
+    );
+
+
+    gradient.addColorStop(
+        .5,
+        "#a0df80"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "#3d864c"
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    /*
+      تونل بالا
+    */
+
+    ctx.fillRect(
+        tunnel.x,
+        0,
+        tunnel.width,
+        tunnel.top
+    );
+
+
+    /*
+      تونل پایین
+    */
+
+    ctx.fillRect(
+        tunnel.x,
+        bottom,
+        tunnel.width,
+        H-35-bottom
+    );
+
+
+    /*
+      لبه‌ها
+    */
+
+    ctx.fillStyle =
+        "#347743";
+
+
+    ctx.fillRect(
+        tunnel.x-6,
+        tunnel.top-15,
+        tunnel.width+12,
+        15
+    );
+
+
+    ctx.fillRect(
+        tunnel.x-6,
+        bottom,
+        tunnel.width+12,
+        15
+    );
+
+
+    /*
+      برگ‌ها
+    */
+
+    ctx.fillStyle =
+        "#c1ee99";
+
+
+    for(
+        let y=35;
+        y<tunnel.top-18;
+        y+=47
+    ) {
+
+        ctx.beginPath();
+
+
+        ctx.ellipse(
+            tunnel.x+18,
+            y,
+            10,
+            5,
+            -.5,
+            0,
+            Math.PI*2
+        );
+
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =========================
+   سکه
+========================= */
+
+function drawCoin(coin) {
+
+    if(coin.collected)
+        return;
+
+
+    coin.phase += .08;
+
+
+    const scale =
+        1 +
+        Math.sin(
+            coin.phase
+        )*.08;
+
+
+    ctx.save();
+
+
+    ctx.translate(
+        coin.x,
+        coin.y
+    );
+
+
+    ctx.scale(
+        scale,
+        scale
+    );
+
+
+    ctx.fillStyle =
+        "#ffd35c";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        0,
+        0,
+        coin.radius,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.strokeStyle =
+        "#e4a43c";
+
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.stroke();
+
+
+    ctx.fillStyle =
+        "#fff0a1";
+
+
+    ctx.font =
+        "bold 11px Arial";
+
+
+    ctx.textAlign =
+        "center";
+
+
+    ctx.textBaseline =
+        "middle";
+
+
+    ctx.fillText(
+        "★",
+        0,
+        1
+    );
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   مرغابی
+========================= */
+
+function drawDuck() {
+
+    ctx.save();
+
+
+    ctx.translate(
+        duck.x,
+        duck.y
+    );
+
+
+    duck.rotation =
+        Math.max(
+            -.35,
+            Math.min(
+                duck.velocity*.055,
+                .55
+            )
+        );
+
+
+    ctx.rotate(
+        duck.rotation
+    );
+
+
+    /*
+      نخ بقچه
+    */
+
+    ctx.strokeStyle =
+        "#8c6572";
+
+    ctx.lineWidth =
+        2;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        40,
+        -2
+    );
+
+
+    ctx.lineTo(
+        59,
+        -10
+    );
+
+
+    ctx.stroke();
+
+
+    /*
+      بدن
+    */
+
+    ctx.fillStyle =
+        "#fff1a4";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        0,
+        0,
+        28,
+        19,
+        0,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      بال
+    */
+
+    ctx.fillStyle =
+        "#dfc96f";
+
+
+    ctx.beginPath();
+
+
+    ctx.ellipse(
+        -5,
+        5,
+        16,
+        8,
+        -.3,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      سر
+    */
+
+    ctx.fillStyle =
+        "#fff5b8";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        22,
+        -14,
+        17,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        29,
+        -19,
+        13,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      چشم
+    */
+
+    ctx.fillStyle =
+        "#26373d";
+
+
+    ctx.beginPath();
+
+
+    ctx.arc(
+        33,
+        -23,
+        2.7,
+        0,
+        Math.PI*2
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      منقار
+    */
+
+    ctx.fillStyle =
+        "#efa03a";
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        39,
+        -17
+    );
+
+
+    ctx.lineTo(
+        56,
+        -12
+    );
+
+
+    ctx.lineTo(
+        39,
+        -7
+    );
+
+
+    ctx.closePath();
+
+
+    ctx.fill();
+
+
+    /*
+      بقچه
+    */
+
+    ctx.save();
+
+
+    ctx.translate(
+        48,
+        -3
+    );
+
+
+    ctx.rotate(.12);
+
+
+    ctx.fillStyle =
+        "#d986a6";
+
+
+    ctx.beginPath();
+
+
+    ctx.roundRect(
+        -7,
+        -8,
+        20,
+        14,
+        4
+    );
+
+
+    ctx.fill();
+
+
+    /*
+      بند بقچه
+    */
+
+    ctx.strokeStyle =
+        "#f1c477";
+
+
+    ctx.lineWidth =
+        3;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        -7,
+        -3
+    );
+
+
+    ctx.lineTo(
+        13,
+        -3
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+
+    /*
+      پاها
+    */
+
+    ctx.strokeStyle =
+        "#e59635";
+
+
+    ctx.lineWidth =
+        3;
+
+
+    ctx.beginPath();
+
+
+    ctx.moveTo(
+        -7,
+        16
+    );
+
+
+    ctx.lineTo(
+        -10,
+        27
+    );
+
+
+    ctx.moveTo(
+        7,
+        16
+    );
+
+
+    ctx.lineTo(
+        10,
+        27
+    );
+
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   ذرات
+========================= */
+
+function createParticles(
+    x,
+    y,
+    amount
+) {
+
+    for(
+        let i=0;
+        i<amount;
+        i++
+    ) {
+
+        particles.push({
+
+            x:x,
+
+            y:y,
+
+            vx:random(-2,2),
+
+            vy:random(-2,2),
+
+            life:random(15,30),
+
+            radius:random(1,3)
+
+        });
+
+    }
+
+}
+
+
+function drawParticles() {
+
+    for(
+        let i=particles.length-1;
+        i>=0;
+        i--
+    ) {
+
+        const p =
+            particles[i];
+
+
+        p.x += p.vx;
+
+        p.y += p.vy;
+
+        p.vy += .05;
+
+        p.life--;
+
+
+        ctx.globalAlpha =
+            Math.max(
+                0,
+                p.life/30
+            );
+
+
+        ctx.fillStyle =
+            "#ffffff";
+
+
+        ctx.beginPath();
+
+
+        ctx.arc(
+            p.x,
+            p.y,
+            p.radius,
+            0,
+            Math.PI*2
+        );
+
+
+        ctx.fill();
+
+
+        ctx.globalAlpha =
+            1;
+
+
+        if(
+            p.life<=0
+        ) {
+
+            particles.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   برخورد
+========================= */
+
+function collision() {
+
+    const left =
+        duck.x-23;
+
+    const right =
+        duck.x+29;
+
+    const top =
+        duck.y-17;
+
+    const bottom =
+        duck.y+20;
+
+
+    /*
+      سقف و زمین
+    */
+
+    if(
+        top<=0 ||
+        bottom>=H-35
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+      تونل‌ها
+    */
+
+    for(
+        const tunnel
+        of tunnels
+    ) {
+
+        if(
+            right>tunnel.x &&
+            left<
+            tunnel.x+tunnel.width
+        ) {
+
+            if(
+                top<tunnel.top ||
+                bottom>
+                tunnel.top+
+                tunnel.gap
+            ) {
+
+                return true;
+
+            }
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================
+   گرفتن سکه
+========================= */
+
+function collectCoins() {
+
+    for(
+        const coin
+        of coinObjects
+    ) {
+
+        if(
+            coin.collected
+        )
+            continue;
+
+
+        const distance =
+            Math.hypot(
+                duck.x-coin.x,
+                duck.y-coin.y
+            );
+
+
+        if(
+            distance<25
+        ) {
+
+            coin.collected =
+                true;
+
+
+            coins++;
+
+
+            createParticles(
+                coin.x,
+                coin.y,
+                10
+            );
+
+
+            updateHUD();
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   از دست دادن جان
+========================= */
+
+function loseLife() {
+
+    lives--;
+
+    createParticles(
+        duck.x,
+        duck.y,
+        15
+    );
+
+
+    updateHUD();
+
+
+    if(
+        lives<=0
+    ) {
+
+        gameOver();
+
+        return;
+
+    }
+
+
+    /*
+      برگشت به مسیر
+    */
+
+    duck.x =
+        W*.25;
+
+    duck.y =
+        H*.46;
+
+    duck.velocity =
+        -5;
+
+
+    /*
+      تونل‌های خیلی نزدیک حذف شوند
+    */
+
+    tunnels =
+        tunnels.filter(
+            tunnel =>
+                tunnel.x>
+                duck.x+100
+        );
+
+}
+
+
+/* =========================
+   ذخیره امتیاز
+========================= */
+
+function saveScore() {
+
+    let scores =
+        JSON.parse(
+            localStorage.getItem(
+                "duckScores"
+            ) || "[]"
+        );
+
+
+    scores.push({
+
+        name:playerName,
+
+        score:score,
+
+        coins:coins,
+
+        date:Date.now()
+
+    });
+
+
+    scores.sort(
+        (a,b) =>
+            b.score-a.score
+    );
+
+
+    scores =
+        scores.slice(
+            0,
+            10
+        );
+
+
+    localStorage.setItem(
+        "duckScores",
+        JSON.stringify(scores)
+    );
+
+
+    return scores;
+
+}
+
+
+/* =========================
+   پایان بازی
+========================= */
+
+function gameOver() {
+
+    playing =
+        false;
+
+
+    const oldBest =
+        best;
+
+
+    if(
+        score>best
+    ) {
+
+        best =
+            score;
+
+
+        localStorage.setItem(
+            "duckBest",
+            best
+        );
+
+    }
+
+
+    const scores =
+        saveScore();
+
+
+    document.getElementById(
+        "result"
+    ).innerHTML =
+        playerName +
+        "، امتیاز شما <b>" +
+        score +
+        "</b> بود.<br>" +
+        "🪙 سکه‌ها: <b>" +
+        coins +
+        "</b>";
+
+
+    document.getElementById(
+        "recordMessage"
+    ).textContent =
+        score>oldBest
+        ? "🎉 رکورد جدید!"
+        : "🏆 رکورد فعلی: " + best;
+
+
+    const tbody =
+        document.querySelector(
+            "#leaderboard tbody"
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    scores.forEach(
+        function(item,index) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML =
+                "<td>" +
+                (index+1) +
+                "</td>" +
+
+                "<td>" +
+                escapeHTML(
+                    item.name
+                ) +
+                "</td>" +
+
+                "<td>" +
+                item.score +
+                "</td>";
+
+
+            tbody.appendChild(row);
+
+        }
+    );
+
+
+    document.getElementById(
+        "gameOverScreen"
+    ).style.display =
+        "flex";
+
+
+    updateHUD();
+
+}
+
+
+/* =========================
+   جلوگیری از HTML Injection
+========================= */
+
+function escapeHTML(text) {
+
+    return text.replace(
+        /[&<>"']/g,
+        function(character) {
+
+            return {
+
+                "&":"&amp;",
+                "<":"&lt;",
+                ">":"&gt;",
+                '"':"&quot;",
+                "'":"&#039;"
+
+            }[character];
+
+        }
+    );
+
+}
+
+
+/* =========================
+   حلقه بازی
+========================= */
+
+function gameLoop() {
+
+    if(!playing)
+        return;
+
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /*
+      پس‌زمینه
+    */
+
+    drawBackground();
+
+
+    /*
+      افزایش سختی
+    */
+
+    speed =
+        3.15 +
+        Math.min(
+            score*.055,
+            3.2
+        );
+
+
+    /*
+      فیزیک مرغابی
+    */
+
+    duck.velocity +=
+        duck.gravity;
+
+
+    duck.y +=
+        duck.velocity;
+
+
+    /*
+      ایجاد تونل جدید
+    */
+
+    spawnTimer -=
+        speed;
+
+
+    if(
+        spawnTimer<=0
+    ) {
+
+        createTunnel(
+            W+30
+        );
+
+
+        /*
+          با افزایش امتیاز
+          تونل‌ها نزدیک‌تر می‌شوند.
+        */
+
+        spawnTimer =
+            Math.max(
+                185,
+                285 -
+                score*2.1
+            );
+
+    }
+
+
+    /*
+      حرکت تونل‌ها
+    */
+
+    for(
+        let i=tunnels.length-1;
+        i>=0;
+        i--
+    ) {
+
+        const tunnel =
+            tunnels[i];
+
+
+        tunnel.x -=
+            speed;
+
+
+        /*
+          عبور موفق
+        */
+
+        if(
+            !tunnel.passed &&
+            tunnel.x+
+            tunnel.width<
+            duck.x
+        ) {
+
+            tunnel.passed =
+                true;
+
+
+            score++;
+
+
+            createParticles(
+                duck.x,
+                duck.y,
+                4
+            );
+
+
+            updateHUD();
+
+        }
+
+
+        /*
+          حذف تونل‌های قدیمی
+        */
+
+        if(
+            tunnel.x+
+            tunnel.width<
+            -30
+        ) {
+
+            tunnels.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    /*
+      حرکت سکه‌ها
+    */
+
+    for(
+        let i=coinObjects.length-1;
+        i>=0;
+        i--
+    ) {
+
+        coinObjects[i].x -=
+            speed;
+
+
+        if(
+            coinObjects[i].x<
+            -30
+        ) {
+
+            coinObjects.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+
+    /*
+      رسم
+    */
+
+    tunnels.forEach(
+        drawTunnel
+    );
+
+
+    coinObjects.forEach(
+        drawCoin
+    );
+
+
+    drawGround();
+
+
+    collectCoins();
+
+
+    drawParticles();
+
+
+    drawDuck();
+
+
+    /*
+      برخورد
+    */
+
+    if(
+        collision()
+    ) {
+
+        loseLife();
+
+        if(!playing)
+            return;
+
+    }
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================
+   آماده‌سازی اولیه
+========================= */
+
+createClouds();
+
+drawBackground();
+
+drawGround();
+
+duck.x =
+    W*.25;
+
+duck.y =
+    H*.46;
+
+drawDuck();
+
+updateHUD();
+
+</script>
+
+</body>
+</html>
